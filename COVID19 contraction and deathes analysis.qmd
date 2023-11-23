@@ -17,7 +17,7 @@ library(ggplot2)
 
 Github link:<https://github.com/wuyuntong/Group_Project>
 
-Sources linkes:
+Sources links:
 Health data:
 <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
 
