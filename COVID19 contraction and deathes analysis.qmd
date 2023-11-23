@@ -4,6 +4,7 @@ format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
 ---
+
 ```{r}
 #| message: false
 here::i_am("data-cleaning.Rproj")
@@ -13,3 +14,15 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 ```
+
+Github link:<https://github.com/wuyuntong/Group_Project>
+
+Sources linkes:
+Health data:
+<https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+
+Covid data:
+<https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
+
+Social-economic data:
+<https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
