@@ -1,0 +1,15 @@
+---
+title: "COVID19 contraction and deathes analysis"
+format: html
+editor: visual
+author: Yuntong Wu & Jiaxin Shen
+---
+```{r}
+#| message: false
+here::i_am("data-cleaning.Rproj")
+library(here)
+library(vroom)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
