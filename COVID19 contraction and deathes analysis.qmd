@@ -7,7 +7,7 @@ author: Yuntong Wu & Jiaxin Shen
 
 ```{r}
 #| message: false
-here::i_am("data-cleaning.Rproj")
+here::i_am("Group_Project.Rproj")
 library(here)
 library(vroom)
 library(dplyr)
@@ -26,4 +26,15 @@ Covid data:
 
 Social-economic data:
 <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
+
+## Data Loading
+```{r}
+health <- vroom(here("data", "analytic_data2021.csv"))
+cases <- vroom(here("data", "covid_confirmed_usafacts.csv"))
+deaths <- vroom(here("data", "covid_deaths_usafacts.csv"))
+edu <- vroom(here("data", "Education.csv"))
+pop <- vroom(here("data", "PopulationEstimates.csv"))
+pov <- vroom(here("data", "PovertyEstimates.csv"))
+ump <- vroom(here("data", "Unemployment.csv"))
+```
 
