@@ -27,7 +27,7 @@ This file provides various health-related data indicators for U.S. counties in 2
 
 2.Covid data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts, which dedicated to providing comprehensive, real-time pandemic data from all 50 states especially the data on hotspots and infection rates.
 
-These two files provide respectively the daily data on confirmed cases and deaths from the epidemic by county in the United States from January 2020 to July 2023. We will combine daily data into monthly data to to make the data more intuitive and representative. The covid confirmed number is the main target variable of our analysis.
+These two files provide respectively the daily data on confirmed cases and deaths from the epidemic by county in the United States from January 2020 to July 2023. We will combine daily data into monthly data to to make the data more intuitive and representative. The covid confirmed cases number and covid death number are the main target variables of our analysis.
 
 3.Social-economic data: These four files Education, PopulationEstimates, PovertyEstimates and Unemployment come from USDA's & Economic Research Service, which anticipate trends and emerging issues in agriculture, food, the environment, and rural America and to conduct high-quality, objective economic research to inform and enhance public and private decision making.
 
@@ -38,6 +38,40 @@ PopulationEstimates provides the estimated number of population by county in the
 The data form PovertyEstimates are model-based estimates from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program. This file includes the estimated poverty data of counties in the United States in 2021, and we select the Estimated percent of people of all ages in poverty 2021 as the research variable.
 
 Unemployment includes overall employment status by county in the United States from 2000 to 2022. We mainly choose the unemployment rate and median household income to measure the employment level of each county, and use these two variables to study whether there is a correlation between the poverty level and the number of confirmed cases.
+
+## Description of variables
+
+case_mon: Cumulative covid confirmed cases number as of the end of the month.
+
+death_mon: Cumulative covid death number as of the end of the month.
+
+v009_rawvalue: Percentage of adults who are current smokers (age-adjusted).
+
+v011_rawvalue: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.
+
+v133_rawvalue: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
+
+v070_rawvalue: Percentage of adults age 20 and over reporting no leisure-time physical activity.
+
+v049_rawvalue: Percentage of adults reporting binge or heavy drinking (age-adjusted).
+
+v085_rawvalue: Percentage of population under age 65 without health insurance.
+
+v004_rawvalue: Number of primary care physicians per 100,000 population
+
+v043_rawvalue: Number of reported violent crime offenses per 100,000 population.
+
+PCTPOVALL_2021: Estimated percent of people of all ages in poverty 2021.
+
+Unemployment_rate_2021: Unemployment rate in 2021.
+
+Median_Household_Income_2021: Estimate of median household income in 2021
+
+R_BIRTH_2021: Birth rate in period 7/1/2020 to 6/30/2021
+
+R_DEATH_2021: Death rate in period 7/1/2020 to 6/30/2021
+
+Percent of adults with a bachelor's degree or higher, 2017-21
 
 ```{r}
 #| message: false
