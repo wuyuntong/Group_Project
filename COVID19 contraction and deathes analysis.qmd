@@ -114,4 +114,12 @@ deaths_mon |>
         plot.title = element_text(margin = margin(b = 40)))
 ```
 
+```{r}
+cases_mon |>
+  summarise(across(starts_with("202"), sum)) |>
+  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
+  ggplot(aes(x = month, y = count, group = 1)) + 
+  geom_line() +
+  labs(title = "Nationwide total cases reported from July 2020 to June 2021")
+```
 
