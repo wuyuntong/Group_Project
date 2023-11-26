@@ -4,17 +4,18 @@ format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
 ---
+
 ## Links
 
 Github link: <https://github.com/wuyuntong/Group_Project>
 
-Sources links: 
-Health data: <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+Sources links: Health data: <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
 
 Covid data: <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
 
-Social-economic data: <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
-## Description of the data sources
+Social-economic data: <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/> \## Description of the data sources
+
+## Description of data sources
 
 The data we selected comes from the following three websites: 
 1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R) County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. The Rankings measure the health of nearly every county in all 50 states.
@@ -43,6 +44,7 @@ library(vroom)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(knitr)
 theme_set(theme_bw())
 ```
 
@@ -56,6 +58,42 @@ edu <- vroom(here("data", "Education.csv"))
 pop <- vroom(here("data", "PopulationEstimates.csv"))
 pov <- vroom(here("data", "PovertyEstimates.csv"))
 ump <- vroom(here("data", "Unemployment.csv"))
+```
+
+## Basic information about the data files
+```{r}
+info_health <- data.frame(file_name='health',row_number=nrow(health),col_number=ncol(health))
+knitr::kable(info_health)
+```
+
+```{r}
+info_cases <- data.frame(file_name='cases',row_number=nrow(cases),col_number=ncol(cases))
+knitr::kable(info_cases)
+```
+
+```{r}
+info_deaths <- data.frame(file_name='deaths',row_number=nrow(deaths),col_number=ncol(deaths))
+knitr::kable(info_deaths)
+```
+
+```{r}
+info_edu <- data.frame(file_name='edu',row_number=nrow(edu),col_number=ncol(edu))
+knitr::kable(info_edu)
+```
+
+```{r}
+info_pop <- data.frame(file_name='pop',row_number=nrow(pop),col_number=ncol(pop))
+knitr::kable(info_pop)
+```
+
+```{r}
+info_pov <- data.frame(file_name='pov',row_number=nrow(pov),col_number=ncol(pov))
+knitr::kable(info_pov)
+```
+
+```{r}
+info_ump <- data.frame(file_name='ump',row_number=nrow(ump),col_number=ncol(ump))
+knitr::kable(info_ump)
 ```
 
 ## Data cleaning
@@ -123,6 +161,7 @@ cases_mon |>
   geom_line() +
   labs(title = "Nationwide total cases reported from July 2020 to June 2021")
 ```
+
 ```{r}
 deaths_mon |>
   summarise(across(starts_with("202"), sum)) |>
