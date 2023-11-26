@@ -13,6 +13,7 @@ library(vroom)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+theme_set(theme_bw())
 ```
 
 Github link:<https://github.com/wuyuntong/Group_Project>
@@ -70,4 +71,15 @@ cases_mon <- cov_clean(cases)
 deaths_mon <- cov_clean(deaths)
 ```
 
+## Graphic representation of target variables
+```{r}
+cases_mon |>
+  group_by(State) |>
+  summarise(across(starts_with("2020"), sum), across(starts_with("2021"), sum)) |>
+  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
+  ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
+  labs(title = "Total cases reported across all 50 states from July 2020 to June 2021") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(margin = margin(b = 40)))
+```
 
