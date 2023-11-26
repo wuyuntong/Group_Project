@@ -203,6 +203,19 @@ cases_mon |>
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(margin = margin(b = 40)))
 ```
+```{r}
+deaths_mon |>
+  group_by(State) |>
+  summarise(across(starts_with("2020"), sum), across(starts_with("2021"), sum)) |>
+  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
+  group_by(State) |>
+  mutate_at(vars(count), list(~ .x - lag(.x))) |>
+  na.omit() |>
+  ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
+  labs(title = "New deaths reported across all 50 states from August 2020 to June 2021") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(margin = margin(b = 40)))
+```
 
 ```{r}
 cases_mon |>
