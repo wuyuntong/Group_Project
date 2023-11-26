@@ -9,15 +9,18 @@ author: Yuntong Wu & Jiaxin Shen
 
 Github link: <https://github.com/wuyuntong/Group_Project>
 
-Sources links: Health data: <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+Sources links:
+
+Health data: <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
 
 Covid data: <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
 
-Social-economic data: <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/> \## Description of the data sources
+Social-economic data: <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
 
 ## Description of data sources
 
-The data we selected comes from the following three websites: 
+The data we selected comes from the following three websites:
+
 1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R) County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. The Rankings measure the health of nearly every county in all 50 states.
 
 This file provides various health-related data indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. We plan to select 8 of the variables (Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive, drinking, Uninsured, Primary care physicians and Violent crime}as measures of residents' health levels and study whether there is a correlation between these variables and the covid numbers.
