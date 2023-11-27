@@ -178,6 +178,13 @@ edu_c <- edu |> select(`Federal Information Processing Standard (FIPS) Code`, `S
          )
 ```
 
+```{r}
+pop_c <- pop |> select(FIPStxt, State, Area_Name, CENSUS_2020_POP, DEATHS_2021) |>
+  rename(countyFIPS = FIPStxt,
+         `County Name` = Area_Name,
+         Population = CENSUS_2020_POP,
+         `Total Deaths` = DEATHS_2021)
+```
 
 ## Graphic representation of target variables
 
