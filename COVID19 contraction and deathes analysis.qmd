@@ -171,12 +171,13 @@ deaths_mon <- cov_clean(deaths)
 ```
 
 ```{r}
-edu_c <- edu |> select(`Federal Information Processing Standard (FIPS) Code`, `State`, `Area name`, `Percent of adults with a bachelor's degree or higher, 2017-21`) |>
+edu_c <- edu |> select(`Federal Information Processing Standard (FIPS) Code`, `State`, `Area name`, `Bachelor's degree or higher, 2017-21`) |>
   rename(countyFIPS = `Federal Information Processing Standard (FIPS) Code`,
          `County Name` = `Area name`,
-         `Higher Education Rate` = `Percent of adults with a bachelor's degree or higher, 2017-21`
+         `Higher Education` = `Bachelor's degree or higher, 2017-21`
          )
 ```
+
 
 ## Graphic representation of target variables
 
