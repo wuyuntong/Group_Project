@@ -137,6 +137,10 @@ knitr::kable(info_ump)
 
 ```{r}
 cov_clean <- function(df) {
+  df$countyFIPS <- df$countyFIPS |>
+    as.character() |>
+    str_pad(5, pad = "0")
+
   df <- df |>
     select(
       countyFIPS, `County Name`, State, StateFIPS,
@@ -164,6 +168,10 @@ cov_clean <- function(df) {
 ```{r}
 cases_mon <- cov_clean(cases)
 deaths_mon <- cov_clean(deaths)
+```
+
+```{r}
+edu |> select(`Federal Information Processing Standard (FIPS) Code`, )
 ```
 
 ## Graphic representation of target variables
