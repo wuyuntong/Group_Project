@@ -218,12 +218,13 @@ health_c <- health[2:nrow(health), ] |>
          `County Name` = Name,
          Smoke =`Adult smoking raw value`,
          Obesity =`Adult obesity raw value`,
-         Food_environment =`Food environment index raw value`,
-         Physical_inactivity =`Physical inactivity raw value`,
+         `Food Environment` =`Food environment index raw value`,
+         `Physical inactivity` =`Physical inactivity raw value`,
          Drink =`Excessive drinking raw value`,
          Uninsured =`Uninsured raw value`,
-         Primary_care =`Primary care physicians raw value`)
+         `Primary care` =`Primary care physicians raw value`)
 ```
+
 
 ## Graphic representation of target variables
 
