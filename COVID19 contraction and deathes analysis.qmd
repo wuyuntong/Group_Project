@@ -195,6 +195,14 @@ pov_c <- pov |> select(FIPS_Code, Stabr, Area_name, POVALL_2021, MEDHHINC_2021) 
          `Median Income` = MEDHHINC_2021)
 ```
 
+```{r}
+ump_c <- ump |> select(FIPS_Code, State, Area_Name, Unemployed_2021) |>
+  rename(countyFIPS = FIPS_Code,
+         `County Name` = Area_Name,
+          Unemployed  = Unemployed_2021)
+```
+
+
 ## Graphic representation of target variables
 
 ```{r}
