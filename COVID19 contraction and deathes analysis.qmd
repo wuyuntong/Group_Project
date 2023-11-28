@@ -214,7 +214,7 @@ health_c <- health[2:nrow(health), ] |>
   select(`County FIPS Code`,`State Abbreviation`,Name,`Adult smoking raw value`,`Adult obesity raw value`,`Food environment index raw value`,`Physical inactivity raw value`,`Excessive drinking raw value`,`Uninsured raw value`,`Primary care physicians raw value`,`Violent crime raw value`) |>
   rename(countyFIPS=`County FIPS Code`,
          State=`State Abbreviation`,
-         `County Name` =Name,
+         `County Name` = Name,
          Smoke_r=`Adult smoking raw value`,
          Obesity_r=`Adult obesity raw value`,
          Food_environment_index_r=`Food environment index raw value`,
