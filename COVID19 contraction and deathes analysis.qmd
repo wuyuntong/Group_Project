@@ -178,44 +178,37 @@ deaths_mon <- cov_clean(deaths)
 ```
 
 ```{r}
-edu_c <- edu |> select(`Federal Information Processing Standard (FIPS) Code`, `State`, `Area name`, `Bachelor's degree or higher, 2017-21`) |>
+edu_c <- edu |> select(`Federal Information Processing Standard (FIPS) Code`, `Bachelor's degree or higher, 2017-21`) |>
   rename(countyFIPS = `Federal Information Processing Standard (FIPS) Code`,
-         `County Name` = `Area name`,
          `Higher Education` = `Bachelor's degree or higher, 2017-21`
          )
 ```
 
 ```{r}
-pop_c <- pop |> select(FIPStxt, State, Area_Name, CENSUS_2020_POP, DEATHS_2021) |>
+pop_c <- pop |> select(FIPStxt, CENSUS_2020_POP, DEATHS_2021) |>
   rename(countyFIPS = FIPStxt,
-         `County Name` = Area_Name,
          Population = CENSUS_2020_POP,
          `Total Deaths` = DEATHS_2021)
 ```
 
 ```{r}
-pov_c <- pov |> select(FIPS_Code, Stabr, Area_name, POVALL_2021, MEDHHINC_2021) |>
+pov_c <- pov |> select(FIPS_Code, POVALL_2021, MEDHHINC_2021) |>
   rename(countyFIPS = FIPS_Code,
-         State = Stabr,
-         `County Name` = Area_name,
          Poverty = POVALL_2021,
          `Median Income` = MEDHHINC_2021)
 ```
 
 ```{r}
-ump_c <- ump |> select(FIPS_Code, State, Area_Name, Unemployed_2021) |>
+ump_c <- ump |> select(FIPS_Code, Unemployed_2021) |>
   rename(countyFIPS = FIPS_Code,
-         `County Name` = Area_Name,
           Unemployed  = Unemployed_2021)
 ```
 
 ```{r}
 health_c <- health[2:nrow(health), ] |>
-  select(`County FIPS Code`,`State Abbreviation`,Name,`Adult smoking raw value`,`Adult obesity raw value`,`Food environment index raw value`,`Physical inactivity raw value`,`Excessive drinking raw value`,`Uninsured raw value`,`Primary care physicians raw value`,`Violent crime raw value`) |>
-  rename(countyFIPS=`County FIPS Code`,
-         State=`State Abbreviation`,
-         `County Name` = Name,
-         Smoke =`Adult smoking raw value`,
+  mutate(countyFIPS = paste(`State FIPS Code`, `County FIPS Code`, sep = "")) |>
+  select(countyFIPS,`Adult smoking raw value`,`Adult obesity raw value`,`Food environment index raw value`,`Physical inactivity raw value`,`Excessive drinking raw value`,`Uninsured raw value`,`Primary care physicians raw value`,`Violent crime raw value`) |>
+  rename(Smoke =`Adult smoking raw value`,
          Obesity =`Adult obesity raw value`,
          `Food Environment` =`Food environment index raw value`,
          `Physical inactivity` =`Physical inactivity raw value`,
@@ -224,6 +217,10 @@ health_c <- health[2:nrow(health), ] |>
          `Primary care` =`Primary care physicians raw value`)
 ```
 
+```{r}
+cases_f <- cases_mon |> left_join(health_c, by = "countyFIPS") |>
+  left_join(edu_c, by = "countyFIPS")
+```
 
 ## Graphic representation of target variables
 
