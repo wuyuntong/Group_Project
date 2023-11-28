@@ -216,14 +216,13 @@ health_c <- health[2:nrow(health), ] |>
   rename(countyFIPS=`County FIPS Code`,
          State=`State Abbreviation`,
          `County Name` = Name,
-         Smoke_r=`Adult smoking raw value`,
-         Obesity_r=`Adult obesity raw value`,
-         Food_environment_index_r=`Food environment index raw value`,
-         Physical_inactivity_r=`Physical inactivity raw value`,
-         Drink_r=`Excessive drinking raw value`,
-         Uninsured_r=`Uninsured raw value`,
-         Primary_care_r=`Primary care physicians raw value`,
-         Crime_r=`Violent crime raw value`)
+         Smoke =`Adult smoking raw value`,
+         Obesity =`Adult obesity raw value`,
+         Food_environment =`Food environment index raw value`,
+         Physical_inactivity =`Physical inactivity raw value`,
+         Drink =`Excessive drinking raw value`,
+         Uninsured =`Uninsured raw value`,
+         Primary_care =`Primary care physicians raw value`)
 ```
 
 ## Graphic representation of target variables
