@@ -186,6 +186,15 @@ pop_c <- pop |> select(FIPStxt, State, Area_Name, CENSUS_2020_POP, DEATHS_2021) 
          `Total Deaths` = DEATHS_2021)
 ```
 
+```{r}
+pov_c <- pov |> select(FIPS_Code, Stabr, Area_name, POVALL_2021, MEDHHINC_2021) |>
+  rename(countyFIPS = FIPS_Code,
+         State = Stabr,
+         `County Name` = Area_name,
+         Poverty = POVALL_2021,
+         `Median Income` = MEDHHINC_2021)
+```
+
 ## Graphic representation of target variables
 
 ```{r}
