@@ -171,6 +171,30 @@ cov_clean <- function(df) {
       `2021-05` = `2021-05-31`,
       `2021-06` = `2021-06-30`
     )
+  
+US <- data.frame(
+  countyFIPS = "00000", 
+  `County Name` = "United States", 
+  State = NA, 
+  StateFIPS = NA,
+  `2020-07` = NA,
+  `2020-08` = NA,
+  `2020-09` = NA,
+  `2020-10` = NA,
+  `2020-11` = NA,
+  `2020-12` = NA,
+  `2021-01` = NA,
+  `2021-02` = NA,
+  `2021-03` = NA,
+  `2021-04` = NA,
+  `2021-05` = NA,
+  `2021-06` = NA,
+  check.names = FALSE
+)
+
+df <- bind_rows(US, df)
+
+
 }
 ```
 
