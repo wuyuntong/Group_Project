@@ -241,6 +241,7 @@ health_c <- health[2:nrow(health), ] |>
          Drinking =`Excessive drinking raw value`,
          Uninsured =`Uninsured raw value`,
          `Primary care` =`Primary care physicians raw value`)
+health_c$`Primary care` = 100000*health_c$`Primary care`
 ```
 
 ```{r}
@@ -262,7 +263,7 @@ deaths_f <- deaths_mon |> left_join(health_c, by = "countyFIPS") |>
 ```{r}
 cases_mon |>
   group_by(State) |>
-  summarise(across(starts_with("2020"), sum), across(starts_with("2021"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
   labs(title = "Total cases reported across all 50 states from July 2020 to June 2021") +
@@ -273,7 +274,7 @@ cases_mon |>
 ```{r}
 deaths_mon |>
   group_by(State) |>
-  summarise(across(starts_with("2020"), sum), across(starts_with("2021"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
   labs(title = "Total deaths reported across all 50 states from July 2020 to June 2021") +
@@ -284,7 +285,7 @@ deaths_mon |>
 ```{r}
 cases_mon |>
   group_by(State) |>
-  summarise(across(starts_with("2020"), sum), across(starts_with("2021"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   group_by(State) |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
@@ -298,7 +299,7 @@ cases_mon |>
 ```{r}
 deaths_mon |>
   group_by(State) |>
-  summarise(across(starts_with("2020"), sum), across(starts_with("2021"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   group_by(State) |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
@@ -311,7 +312,7 @@ deaths_mon |>
 
 ```{r}
 cases_mon |>
-  summarise(across(starts_with("202"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   ggplot(aes(x = month, y = count, group = 1)) + 
   geom_line() +
@@ -320,7 +321,7 @@ cases_mon |>
 
 ```{r}
 deaths_mon |>
-  summarise(across(starts_with("202"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   ggplot(aes(x = month, y = count, group = 1)) + 
   geom_line() +
@@ -329,7 +330,7 @@ deaths_mon |>
 
 ```{r}
 deaths_mon |>
-  summarise(across(starts_with("202"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   ggplot(aes(x = month, y = count, group = 1)) + 
   geom_line() +
@@ -338,7 +339,7 @@ deaths_mon |>
 
 ```{r}
 cases_mon |>
-  summarise(across(starts_with("202"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
   na.omit() |>
@@ -350,7 +351,7 @@ cases_mon |>
 
 ```{r}
 deaths_mon |>
-  summarise(across(starts_with("202"), sum)) |>
+  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
   na.omit() |>
