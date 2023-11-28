@@ -147,6 +147,8 @@ cov_clean <- function(df) {
   df$countyFIPS <- df$countyFIPS |>
     as.character() |>
     str_pad(5, pad = "0")
+  
+ df$countyFIPS <- ifelse(df$`County Name` == "Statewide Unallocated", "99999", df$countyFIPS)
 
   df <- df |>
     select(
@@ -207,19 +209,22 @@ ump_c <- ump |> select(FIPS_Code, Unemployed_2021) |>
 ```{r}
 health_c <- health[2:nrow(health), ] |>
   mutate(countyFIPS = paste(`State FIPS Code`, `County FIPS Code`, sep = "")) |>
-  select(countyFIPS,`Adult smoking raw value`,`Adult obesity raw value`,`Food environment index raw value`,`Physical inactivity raw value`,`Excessive drinking raw value`,`Uninsured raw value`,`Primary care physicians raw value`,`Violent crime raw value`) |>
+  select(countyFIPS,`Adult smoking raw value`,`Adult obesity raw value`,`Food environment index raw value`,`Physical inactivity raw value`,`Excessive drinking raw value`,`Uninsured raw value`,`Primary care physicians raw value`) |>
   rename(Smoke =`Adult smoking raw value`,
          Obesity =`Adult obesity raw value`,
          `Food Environment` =`Food environment index raw value`,
          `Physical inactivity` =`Physical inactivity raw value`,
-         Drink =`Excessive drinking raw value`,
+         Drinking =`Excessive drinking raw value`,
          Uninsured =`Uninsured raw value`,
          `Primary care` =`Primary care physicians raw value`)
 ```
 
 ```{r}
 cases_f <- cases_mon |> left_join(health_c, by = "countyFIPS") |>
-  left_join(edu_c, by = "countyFIPS")
+  left_join(edu_c, by = "countyFIPS") |> 
+  left_join(pop_c, by = "countyFIPS") |> 
+  left_join(pov_c, by = "countyFIPS") |>
+  left_join(ump_c, by = "countyFIPS")
 ```
 
 ## Graphic representation of target variables
