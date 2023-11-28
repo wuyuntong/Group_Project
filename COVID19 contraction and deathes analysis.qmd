@@ -51,21 +51,21 @@ case_mon: Cumulative covid confirmed cases number as of the end of the month.
 
 death_mon: Cumulative covid death number as of the end of the month.
 
-v009_rawvalue: Percentage of adults who are current smokers (age-adjusted).
+Smoke_r: Percentage of adults who are current smokers (age-adjusted).
 
-v011_rawvalue: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.
+Obesity_r: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.
 
-v133_rawvalue: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
+Food_environment_index_r: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
 
-v070_rawvalue: Percentage of adults age 20 and over reporting no leisure-time physical activity.
+Physical_inactivity_r: Percentage of adults age 20 and over reporting no leisure-time physical activity.
 
-v049_rawvalue: Percentage of adults reporting binge or heavy drinking (age-adjusted).
+Drink_r: Percentage of adults reporting binge or heavy drinking (age-adjusted).
 
-v085_rawvalue: Percentage of population under age 65 without health insurance.
+Uninsured_r: Percentage of population under age 65 without health insurance.
 
-v004_rawvalue: Number of primary care physicians per 100,000 population.
+Primary_care_r: Number of primary care physicians per 100,000 population.
 
-v043_rawvalue: Number of reported violent crime offenses per 100,000 population.
+Crime_r: Number of reported violent crime offenses per 100,000 population.
 
 Poverty: Estimated number of people of all ages in poverty 2021.
 
@@ -207,6 +207,22 @@ ump_c <- ump |> select(FIPS_Code, State, Area_Name, Unemployed_2021) |>
   rename(countyFIPS = FIPS_Code,
          `County Name` = Area_Name,
           Unemployed  = Unemployed_2021)
+```
+
+```{r}
+health_c <- health[2:nrow(health), ] |>
+  select(`County FIPS Code`,`State Abbreviation`,Name,`Adult smoking raw value`,`Adult obesity raw value`,`Food environment index raw value`,`Physical inactivity raw value`,`Excessive drinking raw value`,`Uninsured raw value`,`Primary care physicians raw value`,`Violent crime raw value`) |>
+  rename(countyFIPS=`County FIPS Code`,
+         State=`State Abbreviation`,
+         `County Name` =Name,
+         Smoke_r=`Adult smoking raw value`,
+         Obesity_r=`Adult obesity raw value`,
+         Food_environment_index_r=`Food environment index raw value`,
+         Physical_inactivity_r=`Physical inactivity raw value`,
+         Drink_r=`Excessive drinking raw value`,
+         Uninsured_r=`Uninsured raw value`,
+         Primary_care_r=`Primary care physicians raw value`,
+         Crime_r=`Violent crime raw value`)
 ```
 
 ## Graphic representation of target variables
