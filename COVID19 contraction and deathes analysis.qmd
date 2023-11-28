@@ -41,6 +41,12 @@ Unemployment includes overall employment status by county in the United States f
 
 ## Description of variables
 
+countyFIPS: Federal Information Processing Standard (FIPS) Code.
+
+state: State abbreviationy.
+
+County Name: Country name.
+
 case_mon: Cumulative covid confirmed cases number as of the end of the month.
 
 death_mon: Cumulative covid death number as of the end of the month.
@@ -57,21 +63,21 @@ v049_rawvalue: Percentage of adults reporting binge or heavy drinking (age-adjus
 
 v085_rawvalue: Percentage of population under age 65 without health insurance.
 
-v004_rawvalue: Number of primary care physicians per 100,000 population
+v004_rawvalue: Number of primary care physicians per 100,000 population.
 
 v043_rawvalue: Number of reported violent crime offenses per 100,000 population.
 
-PCTPOVALL_2021: Estimated percent of people of all ages in poverty 2021.
+Poverty: Estimated number of people of all ages in poverty 2021.
 
-Unemployment_rate_2021: Unemployment rate in 2021.
+Unemployed: Unemployment in 2021.
 
-Median_Household_Income_2021: Estimate of median household income in 2021
+Population: 4/1/2020 resident Census 2020 population.
 
-R_BIRTH_2021: Birth rate in period 7/1/2020 to 6/30/2021
+Median Income: Estimate of median household income in 2021.
 
-R_DEATH_2021: Death rate in period 7/1/2020 to 6/30/2021
+Total Deaths: Death number in period 7/1/2020 to 6/30/2021.
 
-Percent of adults with a bachelor's degree or higher, 2017-21
+Higher Education: Number of adults with a bachelor's degree or higher, 2017-21.
 
 ```{r}
 #| message: false
@@ -98,6 +104,7 @@ ump <- vroom(here("data", "Unemployment.csv"))
 ```
 
 ## Basic information about the data files
+
 ```{r}
 info_health <- data.frame(file_name='health',row_number=nrow(health),col_number=ncol(health))
 knitr::kable(info_health)
@@ -202,7 +209,6 @@ ump_c <- ump |> select(FIPS_Code, State, Area_Name, Unemployed_2021) |>
           Unemployed  = Unemployed_2021)
 ```
 
-
 ## Graphic representation of target variables
 
 ```{r}
@@ -240,6 +246,7 @@ cases_mon |>
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(margin = margin(b = 40)))
 ```
+
 ```{r}
 deaths_mon |>
   group_by(State) |>
@@ -292,6 +299,7 @@ cases_mon |>
   labs(title = "Nationwide new cases reported from August 2020 to June 2021")
 
 ```
+
 ```{r}
 deaths_mon |>
   summarise(across(starts_with("202"), sum)) |>
@@ -302,4 +310,3 @@ deaths_mon |>
   geom_line() +
   labs(title = "Nationwide new deaths reported from August 2020 to June 2021")
 ```
-
