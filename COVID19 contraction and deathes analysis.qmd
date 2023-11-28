@@ -40,32 +40,31 @@ The data form PovertyEstimates are model-based estimates from the U.S. Census Bu
 Unemployment includes overall employment status by county in the United States from 2000 to 2022. We mainly choose the unemployment rate and median household income to measure the employment level of each county, and use these two variables to study whether there is a correlation between the poverty level and the number of confirmed cases.
 
 ## Description of variables
+Below is the description of variables that are used in the project. For other variables, we refer interested readers to the data sources.
 
 countyFIPS: Federal Information Processing Standard (FIPS) Code.
 
-state: State abbreviationy.
+State: State abbreviation.
 
-County Name: Country name.
+County Name: county names.
 
-case_mon: Cumulative covid confirmed cases number as of the end of the month.
+case_mon: containing cumulative COVID-19 confirmed cases number as of the end of each month from July 2020 to June 2021.
 
-death_mon: Cumulative covid death number as of the end of the month.
+death_mon: containing cumulative COVID-19 death number as of the end of each month from July 2020 to June 2021.
 
-Smoke_r: Percentage of adults who are current smokers (age-adjusted).
+Smoke: Percentage of adults who are current smokers (age-adjusted).
 
-Obesity_r: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.
+Obesity: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.
 
-Food_environment_index_r: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
+Food_environment index: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
 
-Physical_inactivity_r: Percentage of adults age 20 and over reporting no leisure-time physical activity.
+Physical inactivity r: Percentage of adults age 20 and over reporting no leisure-time physical activity.
 
-Drink_r: Percentage of adults reporting binge or heavy drinking (age-adjusted).
+Drink: Percentage of adults reporting binge or heavy drinking (age-adjusted).
 
-Uninsured_r: Percentage of population under age 65 without health insurance.
+Uninsured: Percentage of population under age 65 without health insurance.
 
-Primary_care_r: Number of primary care physicians per 100,000 population.
-
-Crime_r: Number of reported violent crime offenses per 100,000 population.
+Primary care: Number of primary care physicians per 100,000 population.
 
 Poverty: Estimated number of people of all ages in poverty 2021.
 
