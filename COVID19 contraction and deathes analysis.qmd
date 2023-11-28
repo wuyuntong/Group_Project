@@ -240,8 +240,17 @@ health_c <- health[2:nrow(health), ] |>
          `Physical inactivity` =`Physical inactivity raw value`,
          Drinking =`Excessive drinking raw value`,
          Uninsured =`Uninsured raw value`,
-         `Primary care` =`Primary care physicians raw value`)
+         `Primary care` =`Primary care physicians raw value`) |>
+  mutate(Smoke = as.numeric(Smoke),
+         Obesity = as.numeric(Obesity),
+         `Food Environment` = as.numeric(`Food Environment`),
+         `Physical inactivity` = as.numeric(`Physical inactivity`),
+         Drinking = as.numeric(Drinking),
+         Uninsured = as.numeric(Uninsured),
+         `Primary care` = as.numeric(`Primary care`))
+
 health_c$`Primary care` = 100000*health_c$`Primary care`
+
 ```
 
 ```{r}
