@@ -84,7 +84,7 @@ For COVID cases and deaths datasets, we formatted the county FIPS code such that
 
 For social-economic datasets, we keep only the countyFIPS and variables mentioned in the section of variable description. For health dataset, we merged county FIPS and state FIPS such that the FIPS code is line with other datasets. The variables for study are selected and are changed from the string type to numeric. Almost all the columns are complete, with no missing values.
 
-For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. The resulting final ones are cases_f and deaths_f. These two datasets are used for clustering and regression tasks.
+For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. Missing values are deleted. The resulting final ones are cases_f and deaths_f. These two datasets are used for clustering and regression tasks.
 
 ## Research question
 
