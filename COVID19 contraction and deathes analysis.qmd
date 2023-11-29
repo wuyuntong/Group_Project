@@ -1,5 +1,5 @@
 ---
-title: "COVID19 contraction and deathes analysis"
+title: "COVID-19 cases and deaths analysis"
 format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
