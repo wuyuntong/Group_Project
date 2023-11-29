@@ -1,42 +1,43 @@
 ---
-title: "An analysis of COVID-19 cases and deaths on county level in US"
+title: "COVID-19 cases and deaths analysis"
 format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
-execute: 
-  keep-md: true
 ---
 
 ## Links
 
 Github link: <https://github.com/wuyuntong/Group_Project>
 
-Data Source links:
+Sources links:
 
-Health data (2021 CHR CSV Analytic Data): <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+Health data: <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
 
-COVID data (cases & deaths): <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
+Covid data: <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
 
-Social-economic data (poverty, unemployment, education, & population): <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
+Social-economic data: <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
 
 ## Description of data sources
-1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. The Rankings measure the health of nearly every county in all 50 states.
 
-This file provides various health-related indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. Our focus is on eight specific variables—Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive drinking, Uninsured, and the availability of Primary care physicians. We aim to investigate the correlation between these health metrics and COVID-19 numbers, seeking insights into the interplay between various factors and the pandemic's impact on communities.
+The data we selected comes from the following three websites:
 
-2.COVID data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts. USAFacts currently counts presumptive positive cases as confirmed cases, as this is in line with how the CDC reports data. For deaths, USAFacts only takes those from state and local agencies if the virus played a direct role in causing death.
+1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R) County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. The Rankings measure the health of nearly every county in all 50 states.
 
-These two files provide daily cumulative data on confirmed cases and deaths attributed to the pandemic, organized by county in the United States spanning from January 2020 to July 2023. Notably, there are some cases counted at the state level are not allocated to counties due to lack of information. We select the number at the end of each month as monthly data to make it more intuitive and representative. The COVID confirmed cases number and COVID death number are the target variables of our analysis. 
+This file provides various health-related data indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. We plan to select 8 of the variables (Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive, drinking, Uninsured, and Primary care physicians) as measures of residents' health levels and study whether there is a correlation between these variables and the covid numbers.
+
+2.Covid data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts, which dedicated to providing comprehensive, real-time pandemic data from all 50 states especially the data on hotspots and infection rates.
+
+These two files provide respectively the daily data on confirmed cases and deaths from the epidemic by county in the United States from January 2020 to July 2023. We will combine daily data into monthly data to to make the data more intuitive and representative. The covid confirmed cases number and covid death number are the main target variables of our analysis.
 
 3.Social-economic data: These four files Education, PopulationEstimates, PovertyEstimates and Unemployment come from USDA's & Economic Research Service, which anticipate trends and emerging issues in agriculture, food, the environment, and rural America and to conduct high-quality, objective economic research to inform and enhance public and private decision making.
 
-The Education dataset comes from multiple programs, including US Census Bureau and American Community Service. This file provides the basic information on the educational attainment of counties in the United States from 2017 to 2021. We focus on the variable, number of people having bachelor's degree or above, in this dataset.
+The file Education provides the basic information on the educational attainment of counties in the United States from 2017 to 2021. We mainly select the variable "Percent of adults with age bachelor's degree or higher" to analyze whether there is a correlation between the educational attainment of counties in the United States and the number of confirmed cases.
 
-PopulationEstimates are from U.S. Census Bureau for 1990, 2000, 2010, and 2020 Censuses of Population, and and Population Estimates Program (PEP). We select population and total deaths for analysis.
+PopulationEstimates provides the estimated number of population by county in the United States from 2020 to 2022. We choose the two variables of birth rate and death rate in 2021 as analysis indicators.
 
-PovertyEstimates are model-based estimates from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program. For counties and states, the program models income and poverty estimates by combining survey data with population estimates and administrative records. The data file file includes the estimated statistics of counties in the United States in 2021. The number of people of all ages in poverty 2021 and median income are selected for analysis.
+The data form PovertyEstimates are model-based estimates from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program. This file includes the estimated poverty data of counties in the United States in 2021, and we select the Estimated percent of people of all ages in poverty 2021 as the research variable.
 
-The county and State unemployment rates are from the Bureau of Labor Statistics (BLS) Local Area Unemployment Statistics (LAUS) program. The Local Area Unemployment Statistics (LAUS) program is a federal-state cooperative effort in which monthly estimates of total employment and unemployment are prepared for over 7,600 areas. This file includes overall employment status by county in the United States from 2000 to 2022. Median household is from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program as in the previous dataset. The number of unemployed for each county is selected for this study.
+Unemployment includes overall employment status by county in the United States from 2000 to 2022. We mainly choose the unemployment rate and median household income to measure the employment level of each county, and use these two variables to study whether there is a correlation between the poverty level and the number of confirmed cases.
 
 ## Description of variables
 
@@ -48,17 +49,17 @@ State: State abbreviation.
 
 County Name: county names.
 
-case_mon: containing cumulative COVID-19 confirmed cases number as of the end of each month from July 2020 to June 2021.
+cases_mon: containing cumulative COVID-19 confirmed cases number as of the end of each month from July 2020 to June 2021.
 
-death_mon: containing cumulative COVID-19 death number as of the end of each month from July 2020 to June 2021.
+deaths_mon: containing cumulative COVID-19 death number as of the end of each month from July 2020 to June 2021.
 
 Smoke: Percentage of adults who are current smokers (age-adjusted).
 
 Obesity: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.
 
-Food_environment index: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
+Food environment index: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
 
-Physical inactivity r: Percentage of adults age 20 and over reporting no leisure-time physical activity.
+Physical inactivity: Percentage of adults age 20 and over reporting no leisure-time physical activity.
 
 Drinking: Percentage of adults reporting binge or heavy drinking (age-adjusted).
 
@@ -104,6 +105,20 @@ library(knitr)
 library(stringr)
 theme_set(theme_bw())
 ```
+
+## Description of data cleaning and jioning
+
+1. Change the "countyFIPS" of "Statewide Unallocated" in cases and deaths to “99999” to unify it with the other tables.
+
+2.Select the cumulative number of COVID-19 confirmed cases and deaths as of the end of each month from July 2020 to June 2021, and rename them.
+
+3.Add a row to the cases table and deaths table representing the condition of the entire United States. 
+
+4.Select the required columns from edu, pop, pov and ump. Rename them.
+
+5.Unify the "countyFIPS" in health with other tables. Select the required columns from health. Then rename them and convert the data into numbers. To make the calculation easier, multiply "APrimary care" by 100000 and handle the missing values.
+
+6.Left join cases and deaths with the other five tables based on "countyFIPS".
 
 ## Data Loading
 
@@ -262,9 +277,8 @@ health_c <- health[2:nrow(health), ] |>
          Drinking = as.numeric(Drinking),
          Uninsured = as.numeric(Uninsured),
          `Primary care` = as.numeric(`Primary care`))
-
 health_c$`Primary care` = 100000*health_c$`Primary care`
-
+health_c[is.na(health_c)]=0
 ```
 
 ```{r}
