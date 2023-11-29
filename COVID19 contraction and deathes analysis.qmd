@@ -1,45 +1,45 @@
 ---
-title: "COVID-19 cases and deaths analysis"
+title: "An analysis of COVID-19 cases and deaths on county level in US"
 format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
+execute: 
+  keep-md: true
 ---
 
 ## Links
 
 Github link: <https://github.com/wuyuntong/Group_Project>
 
-Sources links:
+Data Source links:
 
-Health data: <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+Health data (2021 CHR CSV Analytic Data): <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
 
-Covid data: <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
+COVID data (cases & deaths): <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
 
-Social-economic data: <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
+Social-economic data (poverty, unemployment, education, & population): <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
 
 ## Description of data sources
+1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. The Rankings measure the health of nearly every county in all 50 states.
 
-The data we selected comes from the following three websites:
+This file provides various health-related indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. Our focus is on eight specific variables—Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive drinking, Uninsured, and the availability of Primary care physicians. We aim to investigate the correlation between these health metrics and COVID-19 numbers, seeking insights into the interplay between various factors and the pandemic's impact on communities.
 
-1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R) County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. The Rankings measure the health of nearly every county in all 50 states.
+2.COVID data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts. USAFacts currently counts presumptive positive cases as confirmed cases, as this is in line with how the CDC reports data. For deaths, USAFacts only takes those from state and local agencies if the virus played a direct role in causing death.
 
-This file provides various health-related data indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. We plan to select 8 of the variables (Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive, drinking, Uninsured, Primary care physicians and Violent crime}as measures of residents' health levels and study whether there is a correlation between these variables and the covid numbers.
-
-2.Covid data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts, which dedicated to providing comprehensive, real-time pandemic data from all 50 states especially the data on hotspots and infection rates.
-
-These two files provide respectively the daily data on confirmed cases and deaths from the epidemic by county in the United States from January 2020 to July 2023. We will combine daily data into monthly data to to make the data more intuitive and representative. The covid confirmed cases number and covid death number are the main target variables of our analysis.
+These two files provide daily cumulative data on confirmed cases and deaths attributed to the pandemic, organized by county in the United States spanning from January 2020 to July 2023. Notably, there are some cases counted at the state level are not allocated to counties due to lack of information. We select the number at the end of each month as monthly data to make it more intuitive and representative. The COVID confirmed cases number and COVID death number are the target variables of our analysis. 
 
 3.Social-economic data: These four files Education, PopulationEstimates, PovertyEstimates and Unemployment come from USDA's & Economic Research Service, which anticipate trends and emerging issues in agriculture, food, the environment, and rural America and to conduct high-quality, objective economic research to inform and enhance public and private decision making.
 
-The file Education provides the basic information on the educational attainment of counties in the United States from 2017 to 2021. We mainly select the variable "Percent of adults with age bachelor's degree or higher" to analyze whether there is a correlation between the educational attainment of counties in the United States and the number of confirmed cases.
+The Education dataset comes from multiple programs, including US Census Bureau and American Community Service. This file provides the basic information on the educational attainment of counties in the United States from 2017 to 2021. We focus on the variable, number of people having bachelor's degree or above, in this dataset.
 
-PopulationEstimates provides the estimated number of population by county in the United States from 2020 to 2022. We choose the two variables of birth rate and death rate in 2021 as analysis indicators.
+PopulationEstimates are from U.S. Census Bureau for 1990, 2000, 2010, and 2020 Censuses of Population, and and Population Estimates Program (PEP). We select population and total deaths for analysis.
 
-The data form PovertyEstimates are model-based estimates from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program. This file includes the estimated poverty data of counties in the United States in 2021, and we select the Estimated percent of people of all ages in poverty 2021 as the research variable.
+PovertyEstimates are model-based estimates from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program. For counties and states, the program models income and poverty estimates by combining survey data with population estimates and administrative records. The data file file includes the estimated statistics of counties in the United States in 2021. The number of people of all ages in poverty 2021 and median income are selected for analysis.
 
-Unemployment includes overall employment status by county in the United States from 2000 to 2022. We mainly choose the unemployment rate and median household income to measure the employment level of each county, and use these two variables to study whether there is a correlation between the poverty level and the number of confirmed cases.
+The county and State unemployment rates are from the Bureau of Labor Statistics (BLS) Local Area Unemployment Statistics (LAUS) program. The Local Area Unemployment Statistics (LAUS) program is a federal-state cooperative effort in which monthly estimates of total employment and unemployment are prepared for over 7,600 areas. This file includes overall employment status by county in the United States from 2000 to 2022. Median household is from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program as in the previous dataset. The number of unemployed for each county is selected for this study.
 
 ## Description of variables
+
 Below is the description of variables that are used in the project. For other variables, we refer interested readers to the data sources.
 
 countyFIPS: Federal Information Processing Standard (FIPS) Code.
@@ -79,17 +79,18 @@ Total Deaths: Death number in period 7/1/2020 to 6/30/2021.
 Higher Education: Number of adults with a bachelor's degree or higher, 2017-21.
 
 ## Research question
-The COVID-19 crisis has wreaked havoc on the world economy and people’s lives.  In US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died of it as of mid-July, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021—a period marked by the peak severity of the pandemic and the coexistence of various policies. to understand the potential implications during this period. With the project, we aim to gain an understanding of how different factors and policies played a role during the pandemic.
 
-First, our focus revolves around understanding the dynamics of the pandemic's progression within the US. It is crucial to delve into the data and find out whether there are tangible variations in the trends at some critical moments. For instance, we want to detect if there is a structural shift in the data following the implementation of policies to contain the spread of the virus. Also, we want to see if there is a dramatic increase in the confirmed cases or deaths during the outbreak of a new virus variant and how these numbers change as time goes by. 
+The COVID-19 crisis has wreaked havoc on the world economy and people's lives. In US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died of it as of mid-July, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021---a period marked by the peak severity of the pandemic and the coexistence of various policies. to understand the potential implications during this period. With the project, we aim to gain an understanding of how different factors and policies played a role during the pandemic.
+
+First, our focus revolves around understanding the dynamics of the pandemic's progression within the US. It is crucial to delve into the data and find out whether there are tangible variations in the trends at some critical moments. For instance, we want to detect if there is a structural shift in the data following the implementation of policies to contain the spread of the virus. Also, we want to see if there is a dramatic increase in the confirmed cases or deaths during the outbreak of a new virus variant and how these numbers change as time goes by.
 
 Furthermore, recognizing that states are different in various manners, our analysis seeks to uncover patterns of COVID cases and deaths that may be influenced by these differences. Our investigation extends to labeling the counties using the available characteristics. This could be done by using clustering techniques, such that counties with similar characteristics could be categorized into a group and others with disparate characteristics could be categorized into separate groups.
 
 Lastly, this project also incorporates a nationwide exploration of the covariates that may have impacted the transmission of the virus. The recent study by Almalki et al. (2022) analyzed the cases and death numbers in Guilford County and found that food access and health issues are correlated with COVID cases and deaths by 0.44% and 60%, respectively. In a similar fashion, we consider a larger pool of factors including unemployment, poverty rate, income level, insurance coverage, alcohol abuse, heavy smoking, etc. By delving into these factors, we want to find out the influences that contribute to the number of deaths and infected cases on a broader scale. The intended approach for use is leveraging the linear regression model, and we will evaluate how the model works with its forecasting accuracy.
 
 ### References
-Almalki A, Gokaraju B, Acquaah Y, Turlapaty A (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
 
+Almalki A, Gokaraju B, Acquaah Y, Turlapaty A (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
 
 ```{r}
 #| message: false
