@@ -128,40 +128,38 @@ ump <- vroom(here("data", "Unemployment.csv"))
 ```
 
 ## Basic information about the data files
-
 ```{r}
-info_health <- data.frame(file_name='health',row_number=nrow(health),col_number=ncol(health))
-knitr::kable(info_health)
+info <- function(df) {
+  data.frame(file_name=deparse(substitute(df)),row_number=nrow(df),col_number=ncol(df),missing_number = sum(is.na(df))) |> knitr::kable()
+}
 ```
 
 ```{r}
-info_cases <- data.frame(file_name='cases',row_number=nrow(cases),col_number=ncol(cases))
-knitr::kable(info_cases)
+info(health)
 ```
 
 ```{r}
-info_deaths <- data.frame(file_name='deaths',row_number=nrow(deaths),col_number=ncol(deaths))
-knitr::kable(info_deaths)
+info(cases)
 ```
 
 ```{r}
-info_edu <- data.frame(file_name='edu',row_number=nrow(edu),col_number=ncol(edu))
-knitr::kable(info_edu)
+info(deaths)
 ```
 
 ```{r}
-info_pop <- data.frame(file_name='pop',row_number=nrow(pop),col_number=ncol(pop))
-knitr::kable(info_pop)
+info(edu)
 ```
 
 ```{r}
-info_pov <- data.frame(file_name='pov',row_number=nrow(pov),col_number=ncol(pov))
-knitr::kable(info_pov)
+info(pop)
 ```
 
 ```{r}
-info_ump <- data.frame(file_name='ump',row_number=nrow(ump),col_number=ncol(ump))
-knitr::kable(info_ump)
+info(pov)
+```
+
+```{r}
+info(ump)
 ```
 
 ## Data cleaning
