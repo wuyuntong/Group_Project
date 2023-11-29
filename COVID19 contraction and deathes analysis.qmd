@@ -116,7 +116,7 @@ theme_set(theme_bw())
 
 4.Select the required columns from edu, pop, pov and ump. Rename them.
 
-5.Unify the "countyFIPS" in health with other tables. Select the required columns from health. Then rename them and convert the data into numbers. To make the calculation easier, multiply "APrimary care" by 10000 and handle the missing values.
+5.Unify the "countyFIPS" in health with other tables. Select the required columns from health. Then rename them and convert the data into numbers. To make the calculation easier, multiply "APrimary care" by 100000 and handle the missing values.
 
 6.Left join cases and deaths with the other five tables based on "countyFIPS".
 
