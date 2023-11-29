@@ -275,13 +275,15 @@ cases_f <- cases_mon |> left_join(health_c, by = "countyFIPS") |>
   left_join(edu_c, by = "countyFIPS") |> 
   left_join(pop_c, by = "countyFIPS") |> 
   left_join(pov_c, by = "countyFIPS") |>
-  left_join(ump_c, by = "countyFIPS")
+  left_join(ump_c, by = "countyFIPS") |>
+  na.omit()
 
 deaths_f <- deaths_mon |> left_join(health_c, by = "countyFIPS") |>
   left_join(edu_c, by = "countyFIPS") |> 
   left_join(pop_c, by = "countyFIPS") |> 
   left_join(pov_c, by = "countyFIPS") |>
-  left_join(ump_c, by = "countyFIPS")
+  left_join(ump_c, by = "countyFIPS") |>
+  na.omit()
 ```
 
 ## Graphic representation of target variables
