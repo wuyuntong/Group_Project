@@ -23,7 +23,7 @@ The data we selected comes from the following three websites:
 
 1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R) County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. The Rankings measure the health of nearly every county in all 50 states.
 
-This file provides various health-related data indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. We plan to select 8 of the variables (Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive, drinking, Uninsured, Primary care physicians and Violent crime}as measures of residents' health levels and study whether there is a correlation between these variables and the covid numbers.
+This file provides various health-related data indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. We plan to select 8 of the variables (Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive, drinking, Uninsured, and Primary care physicians) as measures of residents' health levels and study whether there is a correlation between these variables and the covid numbers.
 
 2.Covid data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts, which dedicated to providing comprehensive, real-time pandemic data from all 50 states especially the data on hotspots and infection rates.
 
@@ -49,17 +49,17 @@ State: State abbreviation.
 
 County Name: county names.
 
-case_mon: containing cumulative COVID-19 confirmed cases number as of the end of each month from July 2020 to June 2021.
+cases_mon: containing cumulative COVID-19 confirmed cases number as of the end of each month from July 2020 to June 2021.
 
-death_mon: containing cumulative COVID-19 death number as of the end of each month from July 2020 to June 2021.
+deaths_mon: containing cumulative COVID-19 death number as of the end of each month from July 2020 to June 2021.
 
 Smoke: Percentage of adults who are current smokers (age-adjusted).
 
 Obesity: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.
 
-Food_environment index: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
+Food environment index: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
 
-Physical inactivity r: Percentage of adults age 20 and over reporting no leisure-time physical activity.
+Physical inactivity: Percentage of adults age 20 and over reporting no leisure-time physical activity.
 
 Drinking: Percentage of adults reporting binge or heavy drinking (age-adjusted).
 
