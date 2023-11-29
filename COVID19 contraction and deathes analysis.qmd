@@ -106,6 +106,20 @@ library(stringr)
 theme_set(theme_bw())
 ```
 
+## Description of data cleaning and jioning
+
+1. Change the "countyFIPS" of "Statewide Unallocated" in cases and deaths to “99999” to unify it with the other tables.
+
+2.Select the cumulative number of COVID-19 confirmed cases and deaths as of the end of each month from July 2020 to June 2021, and rename them.
+
+3.Add a row to the cases table and deaths table representing the condition of the entire United States. 
+
+4.Select the required columns from edu, pop, pov and ump. Rename them.
+
+5.Unify the "countyFIPS" in health with other tables. Select the required columns from health. Then rename them and convert the data into numbers. To make the calculation easier, multiply "APrimary care" by 10000 and handle the missing values.
+
+6.Left join cases and death with other tables based on "countyFIPS".
+
 ## Data Loading
 
 ```{r}
