@@ -84,7 +84,7 @@ For COVID cases and deaths datasets, we formatted the county FIPS code such that
 
 For social-economic datasets, we keep only the countyFIPS and variables mentioned in the section of variable description. For health dataset, we merged county FIPS and state FIPS such that the FIPS code is line with other datasets. The variables for study are selected and are changed from the string type to numeric. Almost all the columns are complete, with no missing values.
 
-For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. The resulting final ones are cases_f and deaths_f. These two datasets are used for clustering and regression tasks.
+For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. Rows with missing values are deleted. The resulting final ones are cases_f and deaths_f. These two datasets are used for clustering and regression tasks.
 
 ## Research question
 
@@ -130,7 +130,7 @@ ump <- vroom(here("data", "Unemployment.csv"))
 ## Basic information about the data files
 ```{r}
 info <- function(df) {
-  data.frame(file_name=deparse(substitute(df)),row_number=nrow(df),col_number=ncol(df),missing_number = sum(is.na(df))) |> knitr::kable()
+  data.frame(file_name = deparse(substitute(df)), row_number = nrow(df), col_number = ncol(df), missing_number = sum(is.na(df))) |> knitr::kable()
 }
 ```
 
@@ -169,8 +169,8 @@ cov_clean <- function(df) {
   df$countyFIPS <- df$countyFIPS |>
     as.character() |>
     str_pad(5, pad = "0")
-  
- df$countyFIPS <- ifelse(df$`County Name` == "Statewide Unallocated", "99999", df$countyFIPS)
+
+  df$countyFIPS <- ifelse(df$`County Name` == "Statewide Unallocated", "99999", df$countyFIPS)
 
   df <- df |>
     select(
@@ -193,30 +193,28 @@ cov_clean <- function(df) {
       `2021-05` = `2021-05-31`,
       `2021-06` = `2021-06-30`
     )
-  
-US <- data.frame(
-  countyFIPS = "00000", 
-  `County Name` = "United States", 
-  State = NA, 
-  StateFIPS = NA,
-  `2020-07` = NA,
-  `2020-08` = NA,
-  `2020-09` = NA,
-  `2020-10` = NA,
-  `2020-11` = NA,
-  `2020-12` = NA,
-  `2021-01` = NA,
-  `2021-02` = NA,
-  `2021-03` = NA,
-  `2021-04` = NA,
-  `2021-05` = NA,
-  `2021-06` = NA,
-  check.names = FALSE
-)
 
-df <- bind_rows(US, df)
+  US <- data.frame(
+    countyFIPS = "00000",
+    `County Name` = "United States",
+    State = NA,
+    StateFIPS = NA,
+    `2020-07` = NA,
+    `2020-08` = NA,
+    `2020-09` = NA,
+    `2020-10` = NA,
+    `2020-11` = NA,
+    `2020-12` = NA,
+    `2021-01` = NA,
+    `2021-02` = NA,
+    `2021-03` = NA,
+    `2021-04` = NA,
+    `2021-05` = NA,
+    `2021-06` = NA,
+    check.names = FALSE
+  )
 
-
+  df <- bind_rows(US, df)
 }
 ```
 
@@ -226,61 +224,78 @@ deaths_mon <- cov_clean(deaths)
 ```
 
 ```{r}
-edu_c <- edu |> select(`Federal Information Processing Standard (FIPS) Code`, `Bachelor's degree or higher, 2017-21`) |>
-  rename(countyFIPS = `Federal Information Processing Standard (FIPS) Code`,
-         `Higher Education` = `Bachelor's degree or higher, 2017-21`
-         )
+edu_c <- edu |>
+  select(`Federal Information Processing Standard (FIPS) Code`, `Bachelor's degree or higher, 2017-21`) |>
+  rename(
+    countyFIPS = `Federal Information Processing Standard (FIPS) Code`,
+    `Higher Education` = `Bachelor's degree or higher, 2017-21`
+  )
 ```
 
 ```{r}
-pop_c <- pop |> select(FIPStxt, CENSUS_2020_POP, DEATHS_2021) |>
-  rename(countyFIPS = FIPStxt,
-         Population = CENSUS_2020_POP,
-         `Total Deaths` = DEATHS_2021)
+pop_c <- pop |>
+  select(FIPStxt, CENSUS_2020_POP, DEATHS_2021) |>
+  rename(
+    countyFIPS = FIPStxt,
+    Population = CENSUS_2020_POP,
+    `Total Deaths` = DEATHS_2021
+  )
 ```
 
 ```{r}
-pov_c <- pov |> select(FIPS_Code, POVALL_2021, MEDHHINC_2021) |>
-  rename(countyFIPS = FIPS_Code,
-         Poverty = POVALL_2021,
-         `Median Income` = MEDHHINC_2021)
+pov_c <- pov |>
+  select(FIPS_Code, POVALL_2021, MEDHHINC_2021) |>
+  rename(
+    countyFIPS = FIPS_Code,
+    Poverty = POVALL_2021,
+    `Median Income` = MEDHHINC_2021
+  )
 ```
 
 ```{r}
-ump_c <- ump |> select(FIPS_Code, Unemployed_2021) |>
-  rename(countyFIPS = FIPS_Code,
-          Unemployed  = Unemployed_2021)
+ump_c <- ump |>
+  select(FIPS_Code, Unemployed_2021) |>
+  rename(
+    countyFIPS = FIPS_Code,
+    Unemployed = Unemployed_2021
+  )
 ```
 
 ```{r}
 health_c <- health[2:nrow(health), ] |>
   mutate(countyFIPS = paste(`State FIPS Code`, `County FIPS Code`, sep = "")) |>
-  select(countyFIPS,`Adult smoking raw value`,`Adult obesity raw value`,`Food environment index raw value`,`Physical inactivity raw value`,`Excessive drinking raw value`,`Uninsured raw value`) |>
-  rename(Smoke =`Adult smoking raw value`,
-         Obesity =`Adult obesity raw value`,
-         `Food Environment` =`Food environment index raw value`,
-         `Physical inactivity` =`Physical inactivity raw value`,
-         Drinking =`Excessive drinking raw value`,
-         Uninsured =`Uninsured raw value`) |>
-  mutate(Smoke = as.numeric(Smoke),
-         Obesity = as.numeric(Obesity),
-         `Food Environment` = as.numeric(`Food Environment`),
-         `Physical inactivity` = as.numeric(`Physical inactivity`),
-         Drinking = as.numeric(Drinking),
-         Uninsured = as.numeric(Uninsured))
+  select(countyFIPS, `Adult smoking raw value`, `Adult obesity raw value`, `Food environment index raw value`, `Physical inactivity raw value`, `Excessive drinking raw value`, `Uninsured raw value`) |>
+  rename(
+    Smoke = `Adult smoking raw value`,
+    Obesity = `Adult obesity raw value`,
+    `Food Environment` = `Food environment index raw value`,
+    `Physical inactivity` = `Physical inactivity raw value`,
+    Drinking = `Excessive drinking raw value`,
+    Uninsured = `Uninsured raw value`
+  ) |>
+  mutate(
+    Smoke = as.numeric(Smoke),
+    Obesity = as.numeric(Obesity),
+    `Food Environment` = as.numeric(`Food Environment`),
+    `Physical inactivity` = as.numeric(`Physical inactivity`),
+    Drinking = as.numeric(Drinking),
+    Uninsured = as.numeric(Uninsured)
+  )
 ```
 
 ```{r}
-cases_f <- cases_mon |> left_join(health_c, by = "countyFIPS") |>
-  left_join(edu_c, by = "countyFIPS") |> 
-  left_join(pop_c, by = "countyFIPS") |> 
+cases_f <- cases_mon |>
+  left_join(health_c, by = "countyFIPS") |>
+  left_join(edu_c, by = "countyFIPS") |>
+  left_join(pop_c, by = "countyFIPS") |>
   left_join(pov_c, by = "countyFIPS") |>
   left_join(ump_c, by = "countyFIPS") |>
   na.omit()
 
-deaths_f <- deaths_mon |> left_join(health_c, by = "countyFIPS") |>
-  left_join(edu_c, by = "countyFIPS") |> 
-  left_join(pop_c, by = "countyFIPS") |> 
+deaths_f <- deaths_mon |>
+  left_join(health_c, by = "countyFIPS") |>
+  left_join(edu_c, by = "countyFIPS") |>
+  left_join(pop_c, by = "countyFIPS") |>
   left_join(pov_c, by = "countyFIPS") |>
   left_join(ump_c, by = "countyFIPS") |>
   na.omit()
@@ -293,10 +308,13 @@ cases_mon |>
   group_by(State) |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
+  ggplot(aes(x = month, y = count, group = State, color = State)) +
+  geom_line() +
   labs(title = "Total cases reported across all 50 states from July 2020 to June 2021") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(margin = margin(b = 40)))
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(margin = margin(b = 40))
+  )
 ```
 
 ```{r}
@@ -304,10 +322,13 @@ deaths_mon |>
   group_by(State) |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
+  ggplot(aes(x = month, y = count, group = State, color = State)) +
+  geom_line() +
   labs(title = "Total deaths reported across all 50 states from July 2020 to June 2021") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(margin = margin(b = 40)))
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(margin = margin(b = 40))
+  )
 ```
 
 ```{r}
@@ -318,10 +339,13 @@ cases_mon |>
   group_by(State) |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
   na.omit() |>
-  ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
+  ggplot(aes(x = month, y = count, group = State, color = State)) +
+  geom_line() +
   labs(title = "New cases reported across all 50 states from August 2020 to June 2021") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(margin = margin(b = 40)))
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(margin = margin(b = 40))
+  )
 ```
 
 ```{r}
@@ -332,17 +356,20 @@ deaths_mon |>
   group_by(State) |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
   na.omit() |>
-  ggplot(aes(x = month, y = count, group = State, color = State)) + geom_line() +
+  ggplot(aes(x = month, y = count, group = State, color = State)) +
+  geom_line() +
   labs(title = "New deaths reported across all 50 states from August 2020 to June 2021") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(margin = margin(b = 40)))
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(margin = margin(b = 40))
+  )
 ```
 
 ```{r}
 cases_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = 1)) + 
+  ggplot(aes(x = month, y = count, group = 1)) +
   geom_line() +
   labs(title = "Nationwide total cases reported from July 2020 to June 2021")
 ```
@@ -351,7 +378,7 @@ cases_mon |>
 deaths_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = 1)) + 
+  ggplot(aes(x = month, y = count, group = 1)) +
   geom_line() +
   labs(title = "Nationwide total deaths reported from July 2020 to June 2021")
 ```
@@ -360,7 +387,7 @@ deaths_mon |>
 deaths_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = 1)) + 
+  ggplot(aes(x = month, y = count, group = 1)) +
   geom_line() +
   labs(title = "Nationwide total deaths reported from July 2020 to June 2021")
 ```
@@ -371,10 +398,9 @@ cases_mon |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
   na.omit() |>
-  ggplot(aes(x = month, y = count, group = 1)) + 
+  ggplot(aes(x = month, y = count, group = 1)) +
   geom_line() +
   labs(title = "Nationwide new cases reported from August 2020 to June 2021")
-
 ```
 
 ```{r}
@@ -383,7 +409,7 @@ deaths_mon |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
   mutate_at(vars(count), list(~ .x - lag(.x))) |>
   na.omit() |>
-  ggplot(aes(x = month, y = count, group = 1)) + 
+  ggplot(aes(x = month, y = count, group = 1)) +
   geom_line() +
   labs(title = "Nationwide new deaths reported from August 2020 to June 2021")
 ```
