@@ -21,13 +21,13 @@ Social-economic data (poverty, unemployment, education, & population): <https://
 
 ## Description of data sources
 
-1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity. 
+1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.
 
-This file provides various health-related indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. Our focus is on six specific variables—Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive drinking, Uninsured. We aim to investigate the correlation between these health metrics and COVID-19 numbers, seeking insights into the interplay between various factors and the pandemic's impact on communities.
+This file provides various health-related indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. Our focus is on six specific variables---Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive drinking, Uninsured. We aim to investigate the correlation between these health metrics and COVID-19 numbers, seeking insights into the interplay between various factors and the pandemic's impact on communities.
 
 2.COVID data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts. USAFacts currently counts presumptive positive cases as confirmed cases, as this is in line with how the CDC reports data. For deaths, USAFacts only takes those from state and local agencies if the virus played a direct role in causing death.
 
-These two files provide daily cumulative data on confirmed cases and deaths attributed to the pandemic, organized by county in the United States spanning from January 2020 to July 2023. Notably, there are some cases counted at the state level are not allocated to counties due to lack of information. We select the number at the end of each month as monthly data to make it more intuitive and representative. The COVID confirmed cases number and COVID death number are the target variables of our analysis. 
+These two files provide daily cumulative data on confirmed cases and deaths attributed to the pandemic, organized by county in the United States spanning from January 2020 to July 2023. Notably, there are some cases counted at the state level are not allocated to counties due to lack of information. We select the number at the end of each month as monthly data to make it more intuitive and representative. The COVID confirmed cases number and COVID death number are the target variables of our analysis.
 
 3.Social-economic data: These four files Education, PopulationEstimates, PovertyEstimates and Unemployment come from USDA's & Economic Research Service, which anticipate trends and emerging issues in agriculture, food, the environment, and rural America and to conduct high-quality, objective economic research to inform and enhance public and private decision making.
 
@@ -41,7 +41,7 @@ The county and State unemployment rates are from the Bureau of Labor Statistics 
 
 ## Description of variables
 
-Below is the description of variables that are used in the project. For other variables, we refer interested readers to the data sources.
+Below is the description of variables that are used in the project after modification. For other variables, we refer interested readers to the data sources.
 
 countyFIPS: Federal Information Processing Standard (FIPS) Code.
 
@@ -65,9 +65,9 @@ Drinking: Percentage of adults reporting binge or heavy drinking (age-adjusted).
 
 Uninsured: Percentage of population under age 65 without health insurance.
 
-Poverty: Estimated number of people of all ages in poverty 2021.
+Poverty: Percentage of estimated number of people of all ages in poverty 2021.
 
-Unemployed: Unemployment in 2021.
+Unemployed: Percentage of unemployment in 2021.
 
 Population: 4/1/2020 resident Census 2020 population.
 
@@ -75,12 +75,11 @@ Median Income: Estimate of median household income in 2021.
 
 Total Deaths: Death number in period 7/1/2020 to 6/30/2021.
 
-Higher Education: Number of adults with a bachelor's degree or higher, 2017-21.
+Higher Education: Percentage of adults with a bachelor's degree or higher, 2017-21.
 
 ## Description of data cleaning and joining
 
 For COVID cases and deaths datasets, we formatted the county FIPS code such that it is a 5-digit string. The FIPS for statewide unallocated cases and deathes is assigned a new value "99999". Variables important to the study(countyFIPS, County Name, State, StateFIPS and the numbers at the end of each month from Jul 2020 to June 2021) are reserved. After that, the case and death numbers are renamed corresponding to each month. A new row for US representing the nationwide cases and deaths is added.
-
 
 For social-economic datasets, we keep only the countyFIPS and variables mentioned in the section of variable description. For health dataset, we merged county FIPS and state FIPS such that the FIPS code is line with other datasets. The variables for study are selected and are changed from the string type to numeric. Almost all the columns are complete, with no missing values.
 
@@ -113,8 +112,6 @@ library(stringr)
 theme_set(theme_bw())
 ```
 
-
-
 ## Data Loading
 
 ```{r}
@@ -128,6 +125,7 @@ ump <- vroom(here("data", "Unemployment.csv"))
 ```
 
 ## Basic information about the data files
+
 ```{r}
 info <- function(df) {
   data.frame(file_name = deparse(substitute(df)), row_number = nrow(df), col_number = ncol(df), missing_number = sum(is.na(df))) |> knitr::kable()
@@ -292,6 +290,12 @@ cases_f <- cases_mon |>
   left_join(ump_c, by = "countyFIPS") |>
   na.omit()
 
+cases_f$`Higher Education` <- cases_f$`Higher Education` / cases_f$Population
+cases_f$`Total Deaths` <- cases_f$`Total Deaths` / cases_f$Population
+cases_f$Poverty <- cases_f$Poverty / cases_f$Population
+cases_f$Unemployed <- cases_f$Unemployed / cases_f$Population
+cases_f$Unemployed <- cases_f$Unemployed / cases_f$Population
+
 deaths_f <- deaths_mon |>
   left_join(health_c, by = "countyFIPS") |>
   left_join(edu_c, by = "countyFIPS") |>
@@ -299,6 +303,11 @@ deaths_f <- deaths_mon |>
   left_join(pov_c, by = "countyFIPS") |>
   left_join(ump_c, by = "countyFIPS") |>
   na.omit()
+
+deaths_f$`Higher Education` <- deaths_f$`Higher Education` / deaths_f$Population
+deaths_f$`Total Deaths` <- deaths_f$`Total Deaths` / deaths_f$Population
+deaths_f$Poverty <- deaths_f$Poverty / deaths_f$Population
+deaths_f$Unemployed <- deaths_f$Unemployed / deaths_f$Population
 ```
 
 ## Graphic representation of target variables
