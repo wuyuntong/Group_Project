@@ -444,4 +444,12 @@ fviz_nbclust(df, kmeans, method = "wss", nboot = 100) +
   geom_vline(xintercept = 4, linetype = 2) +
   labs(subtitle = "Elbow method")
 ```
+We implement k-means clustering with a predetermined value of 4 for better understanding the underlying patterns in the data. As the data contain more than two variables, we use principal component analysis (PCA) to reduce the dimensionality and provide a scatter plot. As depicted in the 2-D cluster plot. The first principal component accounts for 44.4% of the total variation, while the second  component explains an additional 12.8%. The scatter plot indicates the presence of 4 meaningful clusters within the dataset.
+
+
+```{r}
+km.res <- eclust(df, "kmeans", k = 4, nstart = 25, graph = FALSE)
+fviz_cluster(km.res, geom = "point", ellipse.type = "norm",
+             palette = "jco", ggtheme = theme_minimal())
+```
 
