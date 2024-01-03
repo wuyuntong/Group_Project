@@ -118,7 +118,7 @@ theme_set(theme_bw())
 
 ## Data Loading
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 health <- vroom(here("data", "analytic_data2021.csv"))
 cases <- vroom(here("data", "covid_confirmed_usafacts.csv"))
 deaths <- vroom(here("data", "covid_deaths_usafacts.csv"))
@@ -316,7 +316,7 @@ deaths_f$Unemployed <- deaths_f$Unemployed / deaths_f$Population
 
 ## Graphic representation of target variables
 
-```{r, echo=FALSE warning=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 cases_mon |>
   group_by(State) |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
