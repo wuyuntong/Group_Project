@@ -430,8 +430,8 @@ deaths_mon |>
 
 ```{r}
 col <- setdiff(names(cases_f), names(cases_mon))
-df <- cases_f[, col]
-df <- as.data.frame(scale(df))
+df1 <- cases_f[, col]
+df <- as.data.frame(scale(df1))
 hop <- hopkins(df)
 ```
 We prepare our dataset for clustering analysis, which involves the extraction of all variables, excluding both the number of cases and identification variables for each county. 
@@ -451,5 +451,37 @@ We implement k-means clustering with a predetermined value of 4 for better under
 km.res <- eclust(df, "kmeans", k = 4, nstart = 25, graph = FALSE)
 fviz_cluster(km.res, geom = "point", ellipse.type = "norm",
              palette = "jco", ggtheme = theme_minimal())
+```
+The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[3]` data points.
+```{r}
+df1$Cluster <- km.res$cluster
+
+df1_cl1 <- df1[df1$Cluster == 1,]
+df1_cl2 <- df1[df1$Cluster == 2,]
+df1_cl3 <- df1[df1$Cluster == 3,]
+df1_cl4 <- df1[df1$Cluster == 4,]
+clusters <- list(df1_cl1, df1_cl2, df1_cl3, df1_cl4)
+
+tab <- matrix(data=NA, nrow=13, ncol=5)
+tab[1,] <- c('', 'Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4')
+tab[,1] <- c('', col)
+
+for (i in c(1,2,3,4)) {
+  cluster <- clusters[[i]]
+  tab[2, 1+i] <- round(mean(cluster$Smoke), 2)
+  tab[3, 1+i] <- round(mean(cluster$Obesity), 2)
+  tab[4, 1+i] <- round(mean(cluster$`Food Environment`), 4)
+  tab[5, 1+i] <- round(mean(cluster$`Physical inactivity`), 2)
+  tab[6, 1+i] <- round(mean(cluster$Drinking), 2)
+  tab[7, 1+i] <- round(mean(cluster$Uninsured), 2)
+  tab[8, 1+i] <- round(mean(cluster$`Higher Education`), 2)
+  tab[9, 1+i] <- round(mean(cluster$Population))
+  tab[10, 1+i] <- round(mean(cluster$`Total Deaths`), 2)
+  tab[11, 1+i] <- round(mean(cluster$Poverty), 2)
+  tab[12, 1+i] <- round(mean(cluster$`Median Income`), 2)
+  tab[13, 1+i] <- round(mean(cluster$Unemployed), 2)
+}
+
+knitr::kable(tab, digits = 4)
 ```
 
