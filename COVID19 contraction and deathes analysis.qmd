@@ -99,7 +99,7 @@ Lastly, this project also incorporates a nationwide exploration of the covariate
 
 Almalki A, Gokaraju B, Acquaah Y, Turlapaty A (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
 
-```{r}
+```{r, echo=FALSE}
 #| warning: false
 here::i_am("Group_Project.Rproj")
 library(here)
@@ -118,7 +118,7 @@ theme_set(theme_bw())
 
 ## Data Loading
 
-```{r}
+```{r, echo=FALSE}
 health <- vroom(here("data", "analytic_data2021.csv"))
 cases <- vroom(here("data", "covid_confirmed_usafacts.csv"))
 deaths <- vroom(here("data", "covid_deaths_usafacts.csv"))
@@ -130,43 +130,43 @@ ump <- vroom(here("data", "Unemployment.csv"))
 
 ## Basic information about the data files
 
-```{r}
+```{r, echo=FALSE}
 info <- function(df) {
   data.frame(file_name = deparse(substitute(df)), row_number = nrow(df), col_number = ncol(df), missing_number = sum(is.na(df))) |> knitr::kable()
 }
 ```
 
-```{r}
+```{r, echo=FALSE}
 info(health)
 ```
 
-```{r}
+```{r, echo=FALSE}
 info(cases)
 ```
 
-```{r}
+```{r, echo=FALSE}
 info(deaths)
 ```
 
-```{r}
+```{r, echo=FALSE}
 info(edu)
 ```
 
-```{r}
+```{r, echo=FALSE}
 info(pop)
 ```
 
-```{r}
+```{r, echo=FALSE}
 info(pov)
 ```
 
-```{r}
+```{r, echo=FALSE}
 info(ump)
 ```
 
 ## Data cleaning
 
-```{r}
+```{r, echo=FALSE}
 cov_clean <- function(df) {
   df$countyFIPS <- df$countyFIPS |>
     as.character() |>
@@ -220,12 +220,12 @@ cov_clean <- function(df) {
 }
 ```
 
-```{r}
+```{r, echo=FALSE}
 cases_mon <- cov_clean(cases)
 deaths_mon <- cov_clean(deaths)
 ```
 
-```{r}
+```{r, echo=FALSE}
 edu_c <- edu |>
   select(`Federal Information Processing Standard (FIPS) Code`, `Bachelor's degree or higher, 2017-21`) |>
   rename(
@@ -234,7 +234,7 @@ edu_c <- edu |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 pop_c <- pop |>
   select(FIPStxt, CENSUS_2020_POP, DEATHS_2021) |>
   rename(
@@ -244,7 +244,7 @@ pop_c <- pop |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 pov_c <- pov |>
   select(FIPS_Code, POVALL_2021, MEDHHINC_2021) |>
   rename(
@@ -254,7 +254,7 @@ pov_c <- pov |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 ump_c <- ump |>
   select(FIPS_Code, Unemployed_2021) |>
   rename(
@@ -263,7 +263,7 @@ ump_c <- ump |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 health_c <- health[2:nrow(health), ] |>
   mutate(countyFIPS = paste(`State FIPS Code`, `County FIPS Code`, sep = "")) |>
   select(countyFIPS, `Adult smoking raw value`, `Adult obesity raw value`, `Food environment index raw value`, `Physical inactivity raw value`, `Excessive drinking raw value`, `Uninsured raw value`) |>
@@ -285,7 +285,7 @@ health_c <- health[2:nrow(health), ] |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 cases_f <- cases_mon |>
   left_join(health_c, by = "countyFIPS") |>
   left_join(edu_c, by = "countyFIPS") |>
@@ -316,7 +316,7 @@ deaths_f$Unemployed <- deaths_f$Unemployed / deaths_f$Population
 
 ## Graphic representation of target variables
 
-```{r warning=FALSE}
+```{r, echo=FALSE warning=FALSE}
 cases_mon |>
   group_by(State) |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
@@ -330,7 +330,7 @@ cases_mon |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 deaths_mon |>
   group_by(State) |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
@@ -344,7 +344,7 @@ deaths_mon |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 cases_mon |>
   group_by(State) |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
@@ -361,7 +361,7 @@ cases_mon |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 deaths_mon |>
   group_by(State) |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
@@ -378,7 +378,7 @@ deaths_mon |>
   )
 ```
 
-```{r}
+```{r, echo=FALSE}
 cases_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
@@ -387,7 +387,7 @@ cases_mon |>
   labs(title = "Nationwide total cases reported from July 2020 to June 2021")
 ```
 
-```{r}
+```{r, echo=FALSE}
 deaths_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
@@ -396,7 +396,7 @@ deaths_mon |>
   labs(title = "Nationwide total deaths reported from July 2020 to June 2021")
 ```
 
-```{r}
+```{r, echo=FALSE}
 deaths_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
@@ -405,7 +405,7 @@ deaths_mon |>
   labs(title = "Nationwide total deaths reported from July 2020 to June 2021")
 ```
 
-```{r}
+```{r, echo=FALSE}
 cases_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
@@ -416,7 +416,7 @@ cases_mon |>
   labs(title = "Nationwide new cases reported from August 2020 to June 2021")
 ```
 
-```{r}
+```{r, echo=FALSE}
 deaths_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
@@ -428,7 +428,7 @@ deaths_mon |>
 ```
 ## Clustering analysis
 
-```{r}
+```{r, echo=FALSE}
 col <- setdiff(names(cases_f), names(cases_mon))
 df1 <- cases_f[, col]
 df <- as.data.frame(scale(df1))
@@ -439,7 +439,7 @@ The dataset is standardized to remove the effect of scales on the clustering. We
 
 Having established the dataset's suitability for clustering analysis, the subsequent task is to determine the optimal number of clusters for partitioning. This step commonly revolves around optimizing a statistical criterion. An approach involves utilizing the within-cluster sum of squares (WSS), which measures the compactness of resulting clusters—a smaller WSS value indicates a more cohesive clustering. The following figure illustrates the variation in WSS with respect to the number of clusters. While the graph does not display a distinct elbow pattern, we deem it is reasonable to select 4 clusters as the WSS value does not exhibit a substantial decrease beyond this point.
 
-```{r}
+```{r, echo=FALSE}
 fviz_nbclust(df, kmeans, method = "wss", nboot = 100) +
   geom_vline(xintercept = 4, linetype = 2) +
   labs(subtitle = "Elbow method")
@@ -447,13 +447,14 @@ fviz_nbclust(df, kmeans, method = "wss", nboot = 100) +
 We implement k-means clustering with a predetermined value of 4 for better understanding the underlying patterns in the data. As the data contain more than two variables, we use principal component analysis (PCA) to reduce the dimensionality and provide a scatter plot. As depicted in the 2-D cluster plot. The first principal component accounts for 44.4% of the total variation, while the second  component explains an additional 12.8%. The scatter plot indicates the presence of 4 meaningful clusters within the dataset.
 
 
-```{r}
+```{r, echo=FALSE}
 km.res <- eclust(df, "kmeans", k = 4, nstart = 25, graph = FALSE)
 fviz_cluster(km.res, geom = "point", ellipse.type = "norm",
              palette = "jco", ggtheme = theme_minimal())
 ```
 The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[3]` data points. These 4 clusters can be characterized by the distribution of the variables within each cluster. Cluster 3, in particular, has the lowest smoking rate, lowest obesity, highest food environment, lowest physical inactivity and insurance rate and becames the healthiest out of the 4 although the drinking is a bit higher than others. It also has the most population, low total deaths, lowest poverty and highest median income and higher education rate. We therefore give it the label 'Healthiest, high-income big cities'. In contrast, cluster 2 performs the worst among the health indicators and social economic factors, and it has the least population. We thus gives it the label "Unhealthy, low-income small towns". For clusters 1 and 4, they both perform better than cluster 2 but not as well as cluster 3. On the other hand, cluster 4 outperforms cluster 1 in health indicators and social economic factors, therefore, we label cluster 1 as "Less healthy, low-to-middle-income, median cities" and cluster 4 as "Healthier, median-to-high-income, median cities".
-```{r}
+
+```{r, echo=FALSE}
 df1$Cluster <- km.res$cluster
 
 df1_cl1 <- df1[df1$Cluster == 1,]
