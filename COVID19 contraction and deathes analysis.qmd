@@ -452,7 +452,7 @@ km.res <- eclust(df, "kmeans", k = 4, nstart = 25, graph = FALSE)
 fviz_cluster(km.res, geom = "point", ellipse.type = "norm",
              palette = "jco", ggtheme = theme_minimal())
 ```
-The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[3]` data points.
+The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[3]` data points. These 4 clusters can be characterized by the distribution of the variables within each cluster. Cluster 3, in particular, has the lowest smoking rate, lowest obesity, highest food environment, lowest physical inactivity and insurance rate and becames the healthiest out of the 4 although the drinking is a bit higher than others. It also has the most population, low total deaths, lowest poverty and highest median income and higher education rate. We therefore give it the label 'Healthiest, affluent big cities'. In contrast, cluster 2 performs the worst among the health indicators and social economic factors, and it has the least population. We thus gives it the label "Unhealthy, poor small towns".
 ```{r}
 df1$Cluster <- km.res$cluster
 
