@@ -1,12 +1,11 @@
 ---
-title: "A county-level analysis of COVID-19 cases and deaths on  in US"
+title: "Untitled"
 format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
 execute: 
   keep-md: true
 ---
-
 ## Links
 
 Github link: <https://github.com/wuyuntong/Group_Project>
