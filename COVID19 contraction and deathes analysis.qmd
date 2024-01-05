@@ -431,6 +431,38 @@ deaths_mon |>
   labs(title = "Nationwide new deaths reported from August 2020 to June 2021")
 ```
 
+## Time series analysis of national cases and deaths.
+  We aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
+
+### National cases
+```{r}
+national_cases <- cases |>
+  select(starts_with("202"))|>
+  summarise_all(sum, na.rm = TRUE)|>
+  select(`2020-07-31`:`2021-06-30`) |>
+  pivot_longer(everything(), names_to = "Date", values_to = "Cases")
+```
+
+```{r}
+case_ts <- ts(national_cases$Cases)
+plot.ts(case_ts,main = "Original data", xlab = "Cases", ylab = "Time")
+plot.ts(diff(diff(case_ts)),main = "Second-order differenced data", ylab = "Second-order Differenced Cases", xlab = "Time")
+adf.test(diff(diff(case_ts)))
+```
+
+  The test statistic is -9.1682 with a lag order of 6, resulting in a p-value of 0.01.With a p-value less than the significance level (commonly 0.05),the alternative hypothesis of stationarity is supported for the second-order differenced series.
+
+```{r}
+train_case <- case_ts[1:270]
+test_case <- case_ts[271:335] |>
+  ts(start = '271') 
+model_case <- auto.arima(train_case)
+checkresiduals(model_case)
+summary(model_case)
+plot(forecast(model_case,h=65))
+lines(test_case,lwd=2,col='red')
+```
+
 ## Clustering analysis
 
 ```{r, echo=FALSE}
