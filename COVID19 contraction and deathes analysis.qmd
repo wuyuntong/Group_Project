@@ -463,6 +463,53 @@ plot(forecast(model_case,h=65))
 lines(test_case,lwd=2,col='red')
 ```
 
+### National deaths
+```{r}
+national_deaths <- deaths |>
+  select(starts_with("202"))|>
+  mutate(across(everything(), as.numeric))|>
+  summarise_all(sum, na.rm = TRUE)|>  
+  select(`2020-07-31`:`2021-06-30`) |>
+  pivot_longer(everything(), names_to = "Date", values_to = "Deaths")
+```
+
+```{r}
+death_ts <- ts(national_deaths$Deaths)
+plot.ts(death_ts)
+plot.ts(diff(diff(death_ts)))
+```
+
+```{r}
+train_death <- death_ts[1:270]
+test_death <- death_ts[271:335] |>
+  ts(start = '271')
+```
+
+```{r}
+model_death <- auto.arima(train_death)
+checkresiduals(model_death)
+summary(model_death)
+plot(forecast(model_death,h=65))
+lines(test_death,lwd=2,col='red')
+```
+
+### Relationship between national cases and deaths
+
+  Besides examining the correlation between cases and deaths themselves, we also aim to determine if there is a significant relationship between cases and deaths. We opted for linear regression in this case. The results of the linear regression indicate a significant linear correlation between deaths and cases, implying that the virus's fatality rate is maybe a constant value, around 1.53%.
+```{r}
+national_data <- left_join(national_cases,national_deaths,'Date')
+```
+
+```{r}
+c_relation <- lm(national_data$Deaths ~ national_data$Cases)
+ggplot(national_data,aes(x = Cases, y = Deaths)) +
+  geom_point(color = "blue") + 
+  geom_abline(intercept = coef(c_relation)[1], slope = coef(c_relation)[2], color = "red") + 
+  labs(x = "Cases", y = "Deats", title = "Linear Regression") +
+  theme_minimal()
+summary(c_relation)
+```
+
 ## Clustering analysis
 
 ```{r, echo=FALSE}
