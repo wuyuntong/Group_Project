@@ -609,3 +609,10 @@ tree2 <- rpart(death_rate~., data = cl2, control = rpart.control(cp = 0.02))
 tree3 <- rpart(death_rate~., data = cl3, control = rpart.control(cp = 0.02))
 tree4 <- rpart(death_rate~., data = cl4, control = rpart.control(cp = 0.02))
 ```
+
+```{r}
+rpart.plot(tree1)
+rpart.plot(tree2)
+rpart.plot(tree3)
+rpart.plot(tree4)
+```
