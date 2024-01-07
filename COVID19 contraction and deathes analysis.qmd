@@ -125,11 +125,18 @@ library(hopkins)
 library(forecast)
 library(lubridate)
 library(tseries)
+<<<<<<< HEAD
 
+=======
+>>>>>>> b89c871f49358d897eeb1bdd76f53097bbd2e13b
 set.seed(123)
 theme_set(theme_bw())
 ```
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> b89c871f49358d897eeb1bdd76f53097bbd2e13b
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message=FALSE, warning = FALSE)
 ```
@@ -452,11 +459,17 @@ deaths_mon |>
 ```
 
 ## Time series analysis of national cases and deaths.
+<<<<<<< HEAD
 
 We aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
 
 ### National cases
 
+=======
+  We aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
+
+### National cases
+>>>>>>> b89c871f49358d897eeb1bdd76f53097bbd2e13b
 ```{r}
 national_cases <- cases |>
   select(starts_with("202"))|>
@@ -472,7 +485,11 @@ plot.ts(diff(diff(case_ts)),main = "Second-order differenced data", ylab = "Seco
 adf.test(diff(diff(case_ts)))
 ```
 
+<<<<<<< HEAD
 The test statistic is -9.1682 with a lag order of 6, resulting in a p-value of 0.01.With a p-value less than the significance level (commonly 0.05),the alternative hypothesis of stationarity is supported for the second-order differenced series.
+=======
+  The test statistic is -9.1682 with a lag order of 6, resulting in a p-value of 0.01.With a p-value less than the significance level (commonly 0.05),the alternative hypothesis of stationarity is supported for the second-order differenced series.
+>>>>>>> b89c871f49358d897eeb1bdd76f53097bbd2e13b
 
 ```{r}
 train_case <- case_ts[1:270]
@@ -486,7 +503,10 @@ lines(test_case,lwd=2,col='red')
 ```
 
 ### National deaths
+<<<<<<< HEAD
 
+=======
+>>>>>>> b89c871f49358d897eeb1bdd76f53097bbd2e13b
 ```{r}
 national_deaths <- deaths |>
   select(starts_with("202"))|>
@@ -518,8 +538,12 @@ lines(test_death,lwd=2,col='red')
 
 ### Relationship between national cases and deaths
 
+<<<<<<< HEAD
 Besides examining the correlation between cases and deaths themselves, we also aim to determine if there is a significant relationship between cases and deaths. We opted for linear regression in this case. The results of the linear regression indicate a significant linear correlation between deaths and cases, implying that the virus's fatality rate is maybe a constant value, around 1.53%.
 
+=======
+  Besides examining the correlation between cases and deaths themselves, we also aim to determine if there is a significant relationship between cases and deaths. We opted for linear regression in this case. The results of the linear regression indicate a significant linear correlation between deaths and cases, implying that the virus's fatality rate is maybe a constant value, around 1.53%.
+>>>>>>> b89c871f49358d897eeb1bdd76f53097bbd2e13b
 ```{r}
 national_data <- left_join(national_cases,national_deaths,'Date')
 ```
