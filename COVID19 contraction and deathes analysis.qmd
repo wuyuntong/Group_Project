@@ -616,3 +616,21 @@ rpart.plot(tree2)
 rpart.plot(tree3)
 rpart.plot(tree4)
 ```
+
+```{r}
+varImp_plot <- function (tree){
+  df <- data.frame(Importance = tree$variable.importance)
+  df <- df / max(df)
+  df |> rownames_to_column() |> 
+    rename("Variable" = rowname) |>
+    mutate(Variable = forcats::fct_inorder(Variable)) |> 
+    ggplot(aes(y = Variable, x = Importance)) + geom_col()
+}
+
+plot1 <- varImp_plot(tree1)
+plot2 <- varImp_plot(tree2)
+plot3 <- varImp_plot(tree3)
+plot4 <- varImp_plot(tree4)
+
+plot_grid(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2, align = "v", labels = paste0("Cluster ", 1:4), label_size = 10)
+```
