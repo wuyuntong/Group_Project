@@ -1,5 +1,5 @@
 ---
-  title: "Untitled"
+title: "Untitled"
 format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
@@ -593,24 +593,27 @@ knitr::kable(tab)
 ```
 
 ## Regression trees
-
 ```{r}
 var_select <- function(df) {
   df |> select(Smoke, Obesity, `Food Environment`, `Physical inactivity`, Drinking, Uninsured, `death_rate`)
 }
 
+all <- var_select(cases_f)
 cl1 <- var_select(cl1)
 cl2 <- var_select(cl2)
 cl3 <- var_select(cl3)
 cl4 <- var_select(cl4)
 
+tree <- rpart(death_rate~., data = all, control = rpart.control(cp = 0.02))
 tree1 <- rpart(death_rate~., data = cl1, control = rpart.control(cp = 0.02))
 tree2 <- rpart(death_rate~., data = cl2, control = rpart.control(cp = 0.02))
 tree3 <- rpart(death_rate~., data = cl3, control = rpart.control(cp = 0.02))
 tree4 <- rpart(death_rate~., data = cl4, control = rpart.control(cp = 0.02))
 ```
+Having obtained the four clusters, we are able to 
 
 ```{r}
+rpart.plot(tree)
 rpart.plot(tree1)
 rpart.plot(tree2)
 rpart.plot(tree3)
@@ -626,7 +629,7 @@ varImp_plot <- function (tree){
     mutate(Variable = forcats::fct_inorder(Variable)) |> 
     ggplot(aes(y = Variable, x = Importance)) + geom_col()
 }
-
+varImp_plot(tree)
 plot1 <- varImp_plot(tree1)
 plot2 <- varImp_plot(tree2)
 plot3 <- varImp_plot(tree3)
