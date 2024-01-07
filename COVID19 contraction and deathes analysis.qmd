@@ -116,7 +116,8 @@ library(tidyr)
 library(ggplot2)
 library(knitr)
 library(tibble)
-library(caret)
+library(rpart)
+library(rpart.plot)
 library(cowplot)
 library(stringr)
 library(factoextra)
@@ -124,6 +125,7 @@ library(hopkins)
 library(forecast)
 library(lubridate)
 library(tseries)
+
 set.seed(123)
 theme_set(theme_bw())
 ```
@@ -590,7 +592,7 @@ for (i in c(1,2,3,4)) {
 knitr::kable(tab)
 ```
 
-## Regression analysis
+## Regression trees
 
 ```{r}
 var_select <- function(df) {
@@ -602,26 +604,36 @@ cl2 <- var_select(cl2)
 cl3 <- var_select(cl3)
 cl4 <- var_select(cl4)
 
-m1 <- lm(death_rate~., data = cl1)
-m2 <- lm(death_rate~., data = cl2)
-m3 <- lm(death_rate~., data = cl3)
-m4 <- lm(death_rate~., data = cl4)
+tree1 <- rpart(death_rate~., data = cl1, control = rpart.control(cp = 0.02))
+tree2 <- rpart(death_rate~., data = cl2, control = rpart.control(cp = 0.02))
+tree3 <- rpart(death_rate~., data = cl3, control = rpart.control(cp = 0.02))
+tree4 <- rpart(death_rate~., data = cl4, control = rpart.control(cp = 0.02))
 ```
-On the basis of the obtained clusters, we are able to dive into the effect of health factors on the death rate for the infection of the virus. We present a linear regression model as $death = \beta_0 + \beta_1*Smoke + \beta_2*Obs. + \beta_3*FoodEnv + \beta_4 * PhyIn + \beta_5 * Drink + \beta_6*Unins$ for the national data and clustered data. 
+
 
 ```{r}
-varImp_plot <- function (df){
-  df |> tibble::rownames_to_column() |> 
-  rename("Variable" = rowname, "Importance" = Overall) |>
+rpart.plot(tree1)
+rpart.plot(tree2)
+rpart.plot(tree3)
+rpart.plot(tree4)
+```
+
+
+```{r}
+varImp_plot <- function (tree){
+  df <- data.frame(Importance = tree$variable.importance)
+  df <- df / max(df)
+  df |> rownames_to_column() |> 
+  rename("Variable" = rowname) |>
   mutate(Variable = forcats::fct_inorder(Variable)) |> 
   ggplot(aes(y = Variable, x = Importance)) + geom_col()
 }
 
-plot1 <- varImp_plot(varImp(m1))
-plot2 <- varImp_plot(varImp(m2))
-plot3 <- varImp_plot(varImp(m3))
-plot4 <- varImp_plot(varImp(m4))
+plot1 <- varImp_plot(tree1)
+plot2 <- varImp_plot(tree2)
+plot3 <- varImp_plot(tree3)
+plot4 <- varImp_plot(tree4)
 
-plot_grid(plot1, plot2, plot3, plot4, nrow = 1, align = "v")
+plot_grid(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2, align = "v", labels = paste0("Cluster ", 1:4), label_size = 10)
 ```
 
