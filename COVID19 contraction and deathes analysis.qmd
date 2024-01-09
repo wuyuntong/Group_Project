@@ -107,7 +107,7 @@ Lastly, this project also incorporates a nationwide exploration of the covariate
 
 Almalki A, Gokaraju B, Acquaah Y, Turlapaty A (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message= FALSE}
 here::i_am("Group_Project.Rproj")
 library(here)
 library(vroom)
@@ -593,7 +593,7 @@ knitr::kable(tab)
 ```
 
 ## Regression trees
-```{r}
+```{r, echo = FALSE}
 var_select <- function(df) {
   df |> select(Smoke, Obesity, `Food Environment`, `Physical inactivity`, Drinking, Uninsured, `death_rate`)
 }
@@ -610,7 +610,8 @@ tree2 <- rpart(death_rate~., data = cl2, control = rpart.control(cp = 0.02))
 tree3 <- rpart(death_rate~., data = cl3, control = rpart.control(cp = 0.02))
 tree4 <- rpart(death_rate~., data = cl4, control = rpart.control(cp = 0.02))
 ```
-Having obtained the four clusters, we are able to 
+
+After obtaining the four clusters, we are able to analyse the relevant health factors that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees, utilizing the classification and regression trees (CART) algorithm—an unsupervised machine learning approach. The generated trees offer an easily interpretable framework for discerning a county's death rate. Initiating from the root node encompassing all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter, ensuring a balance between model simplicity and predictive power.
 
 ```{r}
 rpart.plot(tree)
@@ -637,3 +638,5 @@ plot4 <- varImp_plot(tree4)
 
 plot_grid(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2, align = "v", labels = paste0("Cluster ", 1:4), label_size = 10)
 ```
+## Conclusion
+
