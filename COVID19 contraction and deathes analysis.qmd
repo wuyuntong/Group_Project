@@ -103,9 +103,7 @@ Furthermore, recognizing that states are different in various manners, our analy
 
 Lastly, this project also incorporates a nationwide exploration of the covariates that may have impacted the transmission of the virus. The recent study by Almalki et al. (2022) analyzed the cases and death numbers in Guilford County and found that food access and health issues are correlated with COVID cases and deaths by 0.44% and 60%, respectively. In a similar fashion, we consider a larger pool of factors including unemployment, poverty rate, income level, insurance coverage, alcohol abuse, heavy smoking, etc. By delving into these factors, we want to find out the influences that contribute to the number of deaths and infected cases on a broader scale. The intended approach for use is leveraging the linear regression model, and we will evaluate how the model works with its forecasting accuracy.
 
-### References
 
-Almalki A, Gokaraju B, Acquaah Y, Turlapaty A (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
 
 ```{r, echo=FALSE, message= FALSE}
 here::i_am("Group_Project.Rproj")
@@ -592,7 +590,7 @@ for (i in c(1,2,3,4)) {
 knitr::kable(tab)
 ```
 
-## Regression trees
+## Regression tree analysis
 ```{r, echo = FALSE}
 var_select <- function(df) {
   df |> select(Smoke, Obesity, `Food Environment`, `Physical inactivity`, Drinking, Uninsured, `death_rate`)
@@ -611,18 +609,22 @@ tree3 <- rpart(death_rate~., data = cl3, control = rpart.control(cp = 0.02))
 tree4 <- rpart(death_rate~., data = cl4, control = rpart.control(cp = 0.02))
 ```
 
-After obtaining the four clusters, we are able to analyse the relevant health factors(namely, smoke, obesity, food environment, physical inactivity, drinking and uninsurance rate) that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees, utilizing the classification and regression trees (CART) algorithm—an unsupervised machine learning approach. The generated trees offer an easily interpretable framework for discerning a county's death rate. Initiating from the root node encompassing all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter such that a good balance between model simplicity and predictive power can be ensured.
+After obtaining the four clusters, we are able to analyse the relevant health factors(namely, smoke, obesity, food environment, physical inactivity, drinking and uninsurance rate) that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees, utilizing the classification and regression trees (CART) algorithm—-an unsupervised machine learning approach. The generated trees offer an easily interpretable framework for discerning a county's death rate. Initiating from the root node encompassing all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter such that a good balance between model simplicity and generality can be ensured.
 
-The generated regression trees offer valuable insights into the data. We start with the the unclustered data. Beginning at the root node, we observe the mean COVID death rate at 0.02%, representing 100% of the total data points. Moving towards the first splitting rule, a physical inactivity rate less than 0.25 corresponds with the lowest death rate of 0.016%, which then encompassing 42% of the total data points. For cases where the physical inactivity rate is larger than or equal to 25%, a new set of splits emerge. Continuing the "if-then" structure, a food environment index exceeding 7.4 results in a summarized death rate of 0.02%. Conversely, if it is below 7.4, we then investigate into the county's uninsurance rate. Should this rate be below 15%, the predicted death rate is 0.023%. Conversely, an uninsurance rate surpassing 15% leads to a highest death rate of 0.027%, occupying the smallest percentage among all terminal nodes.
-```{r}
-rpart.plot(tree)
-rpart.plot(tree1)
+The generated regression trees offer valuable insights into the data. We start with the the unclustered data. Beginning at the root node, we observe the mean COVID death rate at 0.02%, representing 100% of the total data points. Moving towards the first splitting rule, a physical inactivity rate less than 25%  corresponds with the lowest death rate of 0.016%, which then encompassing 42% of the total data points. For cases where the physical inactivity rate is larger than or equal to 25%, a new set of splits emerge. Continuing the "if-then" structure, a food environment index exceeding 7.4 results in a summarized death rate of 0.02%. Conversely, if it is below 7.4, we then investigate into the county's uninsurance rate. Should this rate be below 15%, the predicted death rate is 0.023%. Conversely, an uninsurance rate surpassing 15% leads to a highest death rate of 0.027%, occupying the smallest percentage among all terminal nodes.
+
+For the first cluster, which we label as "Rural median-sized cities with more elderly people", the first split rule is the same as the overall data, where we consider physical inactivity as the primary split, however, the second influential factor becomes the uninsuarance rate. Similar "if-then" rules could be applied in the rest of the tree. 
+Significantly different tree appears to be Cluster 3 -- "small rural cities with more poverty and less education". The first determining factor becomes smoking rate, and drinking also plays an important role as it appears several times in later layers of the tree. 
+
+```{r, echo = FALSE}
+rpart.plot(tree, main = "Regreesion tree for overall data")
+rpart.plot(tree1, main = "Regression tree for Cluster 1 -- ")
 rpart.plot(tree2)
 rpart.plot(tree3)
 rpart.plot(tree4)
 ```
 
-```{r}
+```{r, echo = FALSE}
 varImp_plot <- function (tree){
   df <- data.frame(Importance = tree$variable.importance)
   df <- df / max(df)
@@ -641,3 +643,6 @@ plot_grid(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2, align = "v", labels = 
 ```
 ## Conclusion
 
+## References
+
+Almalki A, Gokaraju B, Acquaah Y, Turlapaty A. (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
