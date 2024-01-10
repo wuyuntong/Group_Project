@@ -113,6 +113,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(knitr)
+library(caret)
 library(tibble)
 library(rpart)
 library(rpart.plot)
@@ -550,7 +551,7 @@ fviz_nbclust(df, kmeans, method = "wss") +
   labs(subtitle = "Elbow method")
 ```
 
-We implement k-means clustering with a predetermined value of 4 for better understanding the underlying patterns in the data. As the data contain more than two variables, we use principal component analysis (PCA) to reduce the dimensionality and provide a scatter plot. As depicted in the 2-D cluster plot. The first principal component accounts for 44.4% of the total variation, while the second component explains an additional 12.8%. The scatter plot indicates the presence of 4 meaningful clusters within the dataset.
+We implement k-means clustering with a predetermined value of 4 for better understanding the underlying patterns in the data. As the data contain more than two variables, we use principal component analysis (PCA) to reduce the dimensionality and provide a scatter plot. As depicted in the 2-D cluster plot. The first principal component accounts for 44.4% of the total variation, while the second component explains an additional 12.8%. The cluster plot below indicates the presence of 4 meaningful clusters within the dataset in spite of some overlap between the clusters (especially between cluster 2 and 4).
 
 ```{r, echo=FALSE}
 km.res <- eclust(df, "kmeans", k = 4, nstart = 25, graph = FALSE)
@@ -558,7 +559,7 @@ fviz_cluster(km.res, geom = "point", ellipse.type = "norm",
              palette = "jco", ggtheme = theme_minimal())
 ```
 
-The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[3]` data points. These 4 clusters can be characterized by the distribution of the variables within each cluster. Cluster 3, in particular, has the lowest smoking rate, lowest obesity, highest food environment, lowest physical inactivity and insurance rate and becomes the healthiest out of the 4 although the drinking is a bit higher than others. It also has the most population, low total deaths, lowest poverty and highest median income and higher education rate. We therefore give it the label 'Healthiest, high-income big cities'. In contrast, cluster 2 performs the worst among the health indicators and social economic factors, and it has the least population. We thus gives it the label "Unhealthy, low-income small towns". For clusters 1 and 4, they both perform better than cluster 2 but not as well as cluster 3. On the other hand, cluster 4 outperforms cluster 1 in health indicators and social economic factors, therefore, we label cluster 1 as "Less healthy, low-to-middle-income, median cities" and cluster 4 as "Healthier, median-to-high-income, median cities". In addition, unemployment does not seem to be a discriminating factor as all resulting clusters maintain an unemployment rate around 20%. We also notice that excessive drinking is more related to healthier regions with more population and higher income.
+The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[3]` data points. These 4 clusters can be characterized by the distribution of the variables within each cluster. Cluster 3, in particular, has the highest homicide rate, rural rate, poverty and total death rate. It also has the smallest population, lowest higher education rate and median income. We therefore give it the label 'Small rural cities with more poverty and less education'. In contrast, cluster 4 has pretty good social results among the social-economic factors with highest higher education, median income but least homicide, rural rate total deaths, and poverty. We thus gives it the label "Big cities with more wealth and education". For clusters 1 and 4, they both perform better than cluster 2 but not as well as cluster 3. On the other hand, cluster 4 outperforms cluster 1 in health indicators and social economic factors, therefore, we label cluster 1 as "Less healthy, low-to-middle-income, median cities" and cluster 4 as "Healthier, median-to-high-income, median cities". In addition, unemployment does not seem to be a discriminating factor as all resulting clusters maintain an unemployment rate around 20%. We also notice that excessive drinking is more related to healthier regions with more population and higher income.
 
 ```{r, echo=FALSE}
 cases_f$Cluster <- km.res$cluster
@@ -601,15 +602,48 @@ cl1 <- var_select(cl1)
 cl2 <- var_select(cl2)
 cl3 <- var_select(cl3)
 cl4 <- var_select(cl4)
+colnames(all) <- make.names(colnames(all))
+colnames(cl1) <- make.names(colnames(cl1))
+colnames(cl2) <- make.names(colnames(cl2))
+colnames(cl3) <- make.names(colnames(cl3))
+colnames(cl4) <- make.names(colnames(cl4))
 
-tree <- rpart(death_rate~., data = all, control = rpart.control(cp = 0.02))
-tree1 <- rpart(death_rate~., data = cl1, control = rpart.control(cp = 0.02))
-tree2 <- rpart(death_rate~., data = cl2, control = rpart.control(cp = 0.02))
-tree3 <- rpart(death_rate~., data = cl3, control = rpart.control(cp = 0.02))
-tree4 <- rpart(death_rate~., data = cl4, control = rpart.control(cp = 0.02))
+ctrl <- trainControl(method = "cv", number = 5)
+grid <- expand.grid(cp = seq(0.01, 0.04, by = 0.01))
+
+
+tree <- train(death_rate ~ ., 
+               data = all,      
+               method = "rpart",             
+               trControl = ctrl,            
+               tuneGrid = grid)
+
+tree1 <- train(death_rate ~ ., 
+               data = cl1,      
+               method = "rpart",             
+               trControl = ctrl,            
+               tuneGrid = grid)
+
+tree2 <- train(death_rate ~ ., 
+               data = cl2,      
+               method = "rpart",             
+               trControl = ctrl,            
+               tuneGrid = grid)
+
+tree3 <- train(death_rate ~ ., 
+               data = cl3,      
+               method = "rpart",             
+               trControl = ctrl,            
+               tuneGrid = grid)
+
+tree4 <- train(death_rate ~ ., 
+               data = cl4,      
+               method = "rpart",             
+               trControl = ctrl,            
+               tuneGrid = grid)
 ```
 
-After obtaining the four clusters, we are able to analyse the relevant health factors(namely, smoke, obesity, food environment, physical inactivity, drinking and uninsurance rate) that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees, utilizing the classification and regression trees (CART) algorithm—-an unsupervised machine learning approach. The generated trees offer an easily interpretable framework for discerning a county's death rate. Initiating from the root node encompassing all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter such that a good balance between model simplicity and generality can be ensured.
+After obtaining the four clusters, we are able to analyse the relevant health factors(namely, smoke, obesity, food environment, physical inactivity, drinking and uninsurance rate) that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees with the classification and regression trees (CART) algorithm. The generated trees offer an easily interpretable framework for discerning a county's death rate. Starting from the root node that contains all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter such that a good balance between model simplicity and generality can be ensured.
 
 The generated regression trees offer valuable insights into the data. We start with the the unclustered data. Beginning at the root node, we observe the mean COVID death rate at 0.02%, representing 100% of the total data points. Moving towards the first splitting rule, a physical inactivity rate less than 25%  corresponds with the lowest death rate of 0.016%, which then encompassing 42% of the total data points. For cases where the physical inactivity rate is larger than or equal to 25%, a new set of splits emerge. Continuing the "if-then" structure, a food environment index exceeding 7.4 results in a summarized death rate of 0.02%. Conversely, if it is below 7.4, we then investigate into the county's uninsurance rate. Should this rate be below 15%, the predicted death rate is 0.023%. Conversely, an uninsurance rate surpassing 15% leads to a highest death rate of 0.027%, occupying the smallest percentage among all terminal nodes.
 
@@ -617,16 +651,16 @@ For the first cluster, which we label as "Rural median-sized cities with more el
 Significantly different tree appears to be Cluster 3 -- "small rural cities with more poverty and less education". The first determining factor becomes smoking rate, and drinking also plays an important role as it appears several times in later layers of the tree. 
 
 ```{r, echo = FALSE}
-rpart.plot(tree, main = "Regreesion tree for overall data")
-rpart.plot(tree1, main = "Regression tree for Cluster 1 -- ")
-rpart.plot(tree2)
-rpart.plot(tree3)
-rpart.plot(tree4)
+rpart.plot(tree$finalModel, main = "Regreesion tree for overall data")
+rpart.plot(tree1$finalModel, main = "Regression tree for Cluster 1 -- ")
+rpart.plot(tree2$finalModel)
+rpart.plot(tree3$finalModel)
+rpart.plot(tree4$finalModel)
 ```
 
 ```{r, echo = FALSE}
 varImp_plot <- function (tree){
-  df <- data.frame(Importance = tree$variable.importance)
+  df <- data.frame(Importance = tree$finalModel$variable.importance)
   df <- df / max(df)
   df |> rownames_to_column() |> 
     rename("Variable" = rowname) |>
