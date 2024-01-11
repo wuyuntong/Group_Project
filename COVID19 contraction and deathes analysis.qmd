@@ -6,22 +6,22 @@ author: Yuntong Wu & Jiaxin Shen
 execute: 
   keep-md: true
 ---
-  
-  ## Links
-  
-  Github link: <https://github.com/wuyuntong/Group_Project>
-  
-  Data Source links:
-  
-  Health data (2021 CHR CSV Analytic Data): <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
-  
-  COVID data (cases & deaths): <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
-  
-  Social-economic data (poverty, unemployment, education, & population): <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
-  
-  ## Description of data sources
-  
-  1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.
+
+\## Links
+
+Github link: <https://github.com/wuyuntong/Group_Project>
+
+Data Source links:
+
+Health data (2021 CHR CSV Analytic Data): <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+
+COVID data (cases & deaths): <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
+
+Social-economic data (poverty, unemployment, education, & population): <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
+
+\## Description of data sources
+
+1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.
 
 This file provides various health-related indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. Our focus is on six specific variables---Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive drinking, Uninsured. We aim to investigate the correlation between these health metrics and COVID-19 numbers, seeking insights into the interplay between various factors and the pandemic's impact on communities.
 
@@ -103,8 +103,6 @@ Furthermore, recognizing that states are different in various manners, our analy
 
 Lastly, this project also incorporates a nationwide exploration of the covariates that may have impacted the transmission of the virus. The recent study by Almalki et al. (2022) analyzed the cases and death numbers in Guilford County and found that food access and health issues are correlated with COVID cases and deaths by 0.44% and 60%, respectively. In a similar fashion, we consider a larger pool of factors including unemployment, poverty rate, income level, insurance coverage, alcohol abuse, heavy smoking, etc. By delving into these factors, we want to find out the influences that contribute to the number of deaths and infected cases on a broader scale. The intended approach for use is leveraging the linear regression model, and we will evaluate how the model works with its forecasting accuracy.
 
-
-
 ```{r, echo=FALSE, message= FALSE}
 here::i_am("Group_Project.Rproj")
 library(here)
@@ -124,7 +122,7 @@ library(hopkins)
 library(forecast)
 library(lubridate)
 library(tseries)
-
+library(moments)
 set.seed(123)
 theme_set(theme_bw())
 ```
@@ -450,6 +448,297 @@ deaths_mon |>
   labs(title = "Nationwide new deaths reported from August 2020 to June 2021")
 ```
 
+## Variables distribution
+
+In this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
+
+### Smoking rate
+```{r}
+ggplot(data = health_c, aes(x = Smoke)) +
+  geom_histogram(color = "black",bins = 50)  +
+  labs(title = "Distribution of smoking rate", x = "Smoking rate", y = "Frequency")
+ggplot(data = health_c, aes(x = Smoke)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(Smoke,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+  
+  geom_vline(aes(xintercept = median(Smoke,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(Smoke, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(Smoke, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(Smoke,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -25) +
+  geom_text(aes(x = median(Smoke,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -24,hjust=-0.3) +
+  geom_text(aes(x = quantile(Smoke, 0.25,na.rm = TRUE), y = 0.25, label = "25%"), vjust = -1) +
+  geom_text(aes(x = quantile(Smoke, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -1)+
+  labs(title = "Density Curve", x = "Smoking rate",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(Smoke)),
+            max=max(Smoke,na.rm = TRUE),
+            min=min(Smoke,na.rm = TRUE),
+    mean = mean(Smoke,na.rm = TRUE),
+    median = median(Smoke,na.rm = TRUE),
+    variance = var(Smoke,na.rm = TRUE),
+    skewness = skewness(Smoke,na.rm = TRUE),
+    kurtosis = kurtosis(Smoke,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion. Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew. Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean.
+### Obesity rate
+```{r}
+ggplot(data = health_c, aes(x = Obesity)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of obesity rate", x = "Obesity rate", y = "Frequency")
+ggplot(data = health_c, aes(x =Obesity)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(Obesity,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(Obesity,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(Obesity, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(Obesity, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(Obesity,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -25) +
+  geom_text(aes(x = median(Obesity,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -24,hjust=-0.3) +
+  geom_text(aes(x = quantile(Obesity, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -1) +
+  geom_text(aes(x = quantile(Obesity, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -1)+
+  labs(title = "Density Curve", x = "Obesity rate",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(Obesity)),
+            max=max(Obesity,na.rm = TRUE),
+            min=min(Obesity,na.rm = TRUE),
+    mean = mean(Obesity,na.rm = TRUE),
+    median = median(Obesity,na.rm = TRUE),
+    variance = var(Obesity,na.rm = TRUE),
+    skewness = skewness(Obesity,na.rm = TRUE),
+    kurtosis = kurtosis(Obesity,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range:The maximum value is 0.589, and the minimum value is 0.143. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion. Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values. Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean.
+### Food environment
+```{r}
+ggplot(data = health_c, aes(x = `Food Environment`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Food Environment", x = "Food Environment", y = "Frequency")
+ggplot(data = health_c, aes(x =`Food Environment`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Food Environment`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Food Environment`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Food Environment`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Food Environment`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Food Environment`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
+  geom_text(aes(x = median(`Food Environment`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
+  geom_text(aes(x = quantile(`Food Environment`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 5) +
+  geom_text(aes(x = quantile(`Food Environment`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 5)+
+  labs(title = "Density Curve", x = "Food Environment",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Food Environment`)),
+            max=max(`Food Environment`,na.rm = TRUE),
+            min=min(`Food Environment`,na.rm = TRUE),
+    mean = mean(`Food Environment`,na.rm = TRUE),
+    median = median(`Food Environment`,na.rm = TRUE),
+    variance = var(`Food Environment`,na.rm = TRUE),
+    skewness = skewness(`Food Environment`,na.rm = TRUE),
+    kurtosis = kurtosis(`Food Environment`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range of Distribution: The minimum value is 0, and the maximum is 10. Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446. Dispersion: The relatively large variance (1.329) suggests a dispersed distribution. Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values. Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values.
+### Physical inactivity
+```{r}
+ggplot(data = health_c, aes(x = `Physical inactivity`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Physical inactivity", x = "Physical inactivity", y = "Frequency")
+ggplot(data = health_c, aes(x =`Physical inactivity`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Physical inactivity`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Physical inactivity`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Physical inactivity`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Physical inactivity`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Physical inactivity`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
+  geom_text(aes(x = median(`Physical inactivity`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -4,hjust=-0.3) +
+  geom_text(aes(x = quantile(`Physical inactivity`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -5) +
+  geom_text(aes(x = quantile(`Physical inactivity`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -5)+
+  labs(title = "Density Curve", x = "Physical inactivity",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Physical inactivity`)),
+            max=max(`Physical inactivity`,na.rm = TRUE),
+            min=min(`Physical inactivity`,na.rm = TRUE),
+    mean = mean(`Physical inactivity`,na.rm = TRUE),
+    median = median(`Physical inactivity`,na.rm = TRUE),
+    variance = var(`Physical inactivity`,na.rm = TRUE),
+    skewness = skewness(`Physical inactivity`,na.rm = TRUE),
+    kurtosis = kurtosis(`Physical inactivity`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range: The minimum value is 0.089, and the maximum is 0.504. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266. Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean.
+### Drinking rate
+```{r}
+ggplot(data = health_c, aes(x = `Drinking`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Drinking", x = "Drinking rate", y = "Frequency")
+ggplot(data = health_c, aes(x =`Drinking`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Drinking`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Drinking`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Drinking`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Drinking`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Drinking`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
+  geom_text(aes(x = median(`Drinking`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -4,hjust=-0.3) +
+  geom_text(aes(x = quantile(`Drinking`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -5) +
+  geom_text(aes(x = quantile(`Drinking`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -5)+
+  labs(title = "Density Curve", x = "Drinking rate",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Drinking`)),
+            max=max(`Drinking`,na.rm = TRUE),
+            min=min(`Drinking`,na.rm = TRUE),
+    mean = mean(`Drinking`,na.rm = TRUE),
+    median = median(`Drinking`,na.rm = TRUE),
+    variance = var(`Drinking`,na.rm = TRUE),
+    skewness = skewness(`Drinking`,na.rm = TRUE),
+    kurtosis = kurtosis(`Drinking`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range: The minimum value is 0.065, and the maximum is 0.0.31. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191. Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean.
+### Uninsured rate
+```{r}
+ggplot(data = health_c, aes(x = `Uninsured`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Uninsured", x = "Uninsured rate", y = "Frequency")
+ggplot(data = health_c, aes(x =`Uninsured`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Uninsured`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Uninsured`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Uninsured`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Uninsured`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Uninsured`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
+  geom_text(aes(x = median(`Uninsured`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -4,hjust=-0.3) +
+  geom_text(aes(x = quantile(`Uninsured`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -1) +
+  geom_text(aes(x = quantile(`Uninsured`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -1)+
+  labs(title = "Density Curve", x = "Uninsured rate",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Uninsured`)),
+            max=max(`Uninsured`,na.rm = TRUE),
+            min=min(`Uninsured`,na.rm = TRUE),
+    mean = mean(`Uninsured`,na.rm = TRUE),
+    median = median(`Uninsured`,na.rm = TRUE),
+    variance = var(`Uninsured`,na.rm = TRUE),
+    skewness = skewness(`Uninsured`,na.rm = TRUE),
+    kurtosis = kurtosis(`Uninsured`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range: The minimum value is 0.024, and the maximum is 0.322. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value implies a distribution peak that is sharper than a normal distribution. This suggests a distribution with a concentration around the mean and heavier tails. 
+### Homicide
+```{r}
+ggplot(data = health_c, aes(x = `Homicide`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Homicide", x = "Homicide", y = "Frequency")
+ggplot(data = health_c, aes(x =`Homicide`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Homicide`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Homicide`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Homicide`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Homicide`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Homicide`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = 3) +
+  geom_text(aes(x = median(`Homicide`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = 4,hjust=0.3) +
+  geom_text(aes(x = quantile(`Homicide`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 15) +
+  geom_text(aes(x = quantile(`Homicide`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 15)+
+  labs(title = "Density Curve", x = "Homicide",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Homicide`)),
+            max=max(`Homicide`,na.rm = TRUE),
+            min=min(`Homicide`,na.rm = TRUE),
+    mean = mean(`Homicide`,na.rm = TRUE),
+    median = median(`Homicide`,na.rm = TRUE),
+    variance = var(`Homicide`,na.rm = TRUE),
+    skewness = skewness(`Homicide`,na.rm = TRUE),
+    kurtosis = kurtosis(`Homicide`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values. Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data. Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values. Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values. Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values. 
+### Rural rate
+```{r}
+ggplot(data = health_c, aes(x = `Rural`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Rural", x = "Rural", y = "Frequency")
+ggplot(data = health_c, aes(x =`Rural`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Rural`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Rural`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Rural`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Rural`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Rural`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
+  geom_text(aes(x = median(`Rural`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
+  geom_text(aes(x = quantile(`Rural`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 5) +
+  geom_text(aes(x = quantile(`Rural`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 5)+
+  labs(title = "Density Curve", x = "Rural",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Rural`)),
+            max=max(`Rural`,na.rm = TRUE),
+            min=min(`Rural`,na.rm = TRUE),
+    mean = mean(`Rural`,na.rm = TRUE),
+    median = median(`Rural`,na.rm = TRUE),
+    variance = var(`Rural`,na.rm = TRUE),
+    skewness = skewness(`Rural`,na.rm = TRUE),
+    kurtosis = kurtosis(`Rural`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range: The data ranges from 0 to 1. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Slight left-skewness suggests a tendency for smaller values. Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails. 
+### Below 18 rate
+```{r}
+ggplot(data = health_c, aes(x = `Below 18`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Below 18", x = "Below 18", y = "Frequency")
+ggplot(data = health_c, aes(x =`Below 18`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Below 18`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Below 18`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Below 18`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Below 18`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Below 18`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
+  geom_text(aes(x = median(`Below 18`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
+  geom_text(aes(x = quantile(`Below 18`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -3) +
+  geom_text(aes(x = quantile(`Below 18`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -3)+
+  labs(title = "Density Curve", x = "Below 18",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Below 18`)),
+            max=max(`Below 18`,na.rm = TRUE),
+            min=min(`Below 18`,na.rm = TRUE),
+    mean = mean(`Below 18`,na.rm = TRUE),
+    median = median(`Below 18`,na.rm = TRUE),
+    variance = var(`Below 18`,na.rm = TRUE),
+    skewness = skewness(`Below 18`,na.rm = TRUE),
+    kurtosis = kurtosis(`Below 18`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+Range: The data ranges from 0 to 0.417. Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution. Dispersion: The extremely low variance indicates that the data points are very close to the mean. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. 
+### Above 65 rate
+```{r}
+ggplot(data = health_c, aes(x = `Above 65`)) +
+  geom_histogram(color = "black",bins = 50) +
+  labs(title = "Distribution of Above 65", x = "Above 65", y = "Frequency")
+ggplot(data = health_c, aes(x =`Above 65`)) +
+ geom_density()+
+  geom_vline(aes(xintercept = mean(`Above 65`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
+  geom_vline(aes(xintercept = median(`Above 65`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
+  geom_vline(aes(xintercept = quantile(`Above 65`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_vline(aes(xintercept = quantile(`Above 65`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
+  geom_text(aes(x = mean(`Above 65`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
+  geom_text(aes(x = median(`Above 65`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
+  geom_text(aes(x = quantile(`Above 65`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 5) +
+  geom_text(aes(x = quantile(`Above 65`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 5)+
+  labs(title = "Density Curve", x = "Above 65",y="Density")
+health_c |>
+  summarise(missing_count=sum(is.na(`Above 65`)),
+            max=max(`Above 65`,na.rm = TRUE),
+            min=min(`Above 65`,na.rm = TRUE),
+    mean = mean(`Above 65`,na.rm = TRUE),
+    median = median(`Above 65`,na.rm = TRUE),
+    variance = var(`Above 65`,na.rm = TRUE),
+    skewness = skewness(`Above 65`,na.rm = TRUE),
+    kurtosis = kurtosis(`Above 65`,na.rm = TRUE)) |>
+  knitr::kable(digits = 3)
+```
+
+Range: The data ranges from 0.049 to 0.582. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. 
+
+
+
+
+
+
 ## Time series analysis of national cases and deaths.
 
 We aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
@@ -592,6 +881,7 @@ knitr::kable(tab)
 ```
 
 ## Regression tree analysis
+
 ```{r, echo = FALSE}
 var_select <- function(df) {
   df |> select(Smoke, Obesity, `Food Environment`, `Physical inactivity`, Drinking, Uninsured, `death_rate`)
@@ -645,10 +935,9 @@ tree4 <- train(death_rate ~ .,
 
 After obtaining the four clusters, we are able to analyse the relevant health factors(namely, smoke, obesity, food environment, physical inactivity, drinking and uninsurance rate) that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees with the classification and regression trees (CART) algorithm. The generated trees offer an easily interpretable framework for discerning a county's death rate. Starting from the root node that contains all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter such that a good balance between model simplicity and generality can be ensured.
 
-The generated regression trees offer valuable insights into the data. We start with the the unclustered data. Beginning at the root node, we observe the mean COVID death rate at 0.02%, representing 100% of the total data points. Moving towards the first splitting rule, a physical inactivity rate less than 25%  corresponds with the lowest death rate of 0.016%, which then encompassing 42% of the total data points. For cases where the physical inactivity rate is larger than or equal to 25%, a new set of splits emerge. Continuing the "if-then" structure, a food environment index exceeding 7.4 results in a summarized death rate of 0.02%. Conversely, if it is below 7.4, we then investigate into the county's uninsurance rate. Should this rate be below 15%, the predicted death rate is 0.023%. Conversely, an uninsurance rate surpassing 15% leads to a highest death rate of 0.027%, occupying the smallest percentage among all terminal nodes.
+The generated regression trees offer valuable insights into the data. We start with the the unclustered data. Beginning at the root node, we observe the mean COVID death rate at 0.02%, representing 100% of the total data points. Moving towards the first splitting rule, a physical inactivity rate less than 25% corresponds with the lowest death rate of 0.016%, which then encompassing 42% of the total data points. For cases where the physical inactivity rate is larger than or equal to 25%, a new set of splits emerge. Continuing the "if-then" structure, a food environment index exceeding 7.4 results in a summarized death rate of 0.02%. Conversely, if it is below 7.4, we then investigate into the county's uninsurance rate. Should this rate be below 15%, the predicted death rate is 0.023%. Conversely, an uninsurance rate surpassing 15% leads to a highest death rate of 0.027%, occupying the smallest percentage among all terminal nodes.
 
-For the first cluster, which we label as "Rural median-sized cities with more elderly people", the first split rule is the same as the overall data, where we consider physical inactivity as the primary split, however, the second influential factor becomes the uninsuarance rate. Similar "if-then" rules could be applied in the rest of the tree. 
-Significantly different tree appears to be Cluster 3 -- "small rural cities with more poverty and less education". The first determining factor becomes smoking rate, and drinking also plays an important role as it appears several times in later layers of the tree. 
+For the first cluster, which we label as "Rural median-sized cities with more elderly people", the first split rule is the same as the overall data, where we consider physical inactivity as the primary split, however, the second influential factor becomes the uninsuarance rate. Similar "if-then" rules could be applied in the rest of the tree. Significantly different tree appears to be Cluster 3 -- "small rural cities with more poverty and less education". The first determining factor becomes smoking rate, and drinking also plays an important role as it appears several times in later layers of the tree.
 
 ```{r, echo = FALSE}
 rpart.plot(tree$finalModel, main = "Regreesion tree for overall data")
@@ -675,6 +964,7 @@ plot4 <- varImp_plot(tree4)
 
 plot_grid(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2, align = "v", labels = paste0("Cluster ", 1:4), label_size = 10)
 ```
+
 ## Conclusion
 
 ## References
