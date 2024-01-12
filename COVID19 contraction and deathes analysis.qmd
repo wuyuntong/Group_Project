@@ -7,6 +7,7 @@ execute:
   keep-md: true
 ---
 
+
 ## Research question
 
 The COVID-19 crisis has wreaked havoc on the world economy and people's lives. In US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died of it as of mid-July, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021---a period marked by the peak severity of the pandemic and the coexistence of various policies. With the project, we aim to gain an understanding of how different factors and policies played a role during the pandemic.
@@ -57,8 +58,9 @@ ump <- vroom(here("data", "Unemployment.csv"))
 
 ## Data sets description
 
-To get reliable results, we first identify the data we need and determine where to get accurate and comprehensive data. The most basic information we need is the daily cumulative number of cases and deaths in different regions, which are the target variables of our research. Additionally, health data are essential. Finally, social-economic data may also play a crucial role. For example, higher income levels may lead to more timely treatment after infection, thereby reducing mortality. Higher education levels may help prevent and control the epidemic, thereby slowing down the growth rate of the number of cases. When selecting data sources, we strive to choose official, comprehensive sources to ensure the authenticity and accuracy of the data. Below are the descriptions of the data sources and variables.
-
+  To get reliable results, we first identify the data we need and determine where to get accurate, comprehensive data. The most basic information we need is the daily cumulative number of cases and deaths in different regions, which are the target variables of our research. Additionally, health data are essential. Finally, social-economic data may also play a crucial role. For example, higher income levels may lead to more timely treatment after infection, thereby reducing mortality. Higher education levels may help prevent and control the epidemic, thereby slowing down the growth rate of the number of cases. When selecting data sources, we strive to choose official, comprehensive sources to ensure the authenticity and accuracy of the data.
+  Below are the descriptions of the data sources and variables.
+  
 ### Description of data sources
 
 1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.
@@ -162,8 +164,6 @@ Total Deaths: Percentage of death number in period 7/1/2020 to 6/30/2021.
 Higher Education: Percentage of adults with a bachelor's degree or higher, 2017-21.
 
 ## Data analysis
-
-After obtaining reliable data, we analyze the data from several aspects. Firstly, we present the overall graphical representations of the data, qualitatively discussing the trends in cumulative cases and deaths. As well as new cases and new deaths. Secondly, we conduct time series analysis on the national total cases and deaths, examining whether there are temporal correlations. We fit an ARIMA model to quantitatively analyze the trend of data over time. Subsequently, we employ the K-means clustering analysis method to cluster different countries. Finally, we use the regression tree method to analyze the impact of various variables on the death rate.
 
 ```{r, echo=FALSE}
 cov_clean <- function(df) {
@@ -323,8 +323,6 @@ deaths_f$Unemployed <- deaths_f$Unemployed / deaths_f$Population
 
 ### Graphic representation of target variables
 
-As we can see from the charts below, the number of cases continues to increase across the country. The growth rate was fastest from 2020-10 to 2021-01. Then the growth rate gradually declined after 2021-01, but the cumulative number of cases still showed an obvious upward trend. The number of new cases has increased sharply since 2020-10, peaking in 2020-12 and then declining rapidly. From the state level, the peaks of new cases basically occur between 2020-10 and 2021-01. At the same time, the number of deaths nationwide has also shown a continuous growth trend, with the fastest growth from 2020-11 to 2021-02. Compared to the number of cases, there is a delay of about a month. Similarly, the number of new deaths peaked in 2021-01 and then showed a clear downward trend.
-
 ```{r, echo=FALSE, warning=FALSE}
 cases_mon |>
   group_by(State) |>
@@ -429,7 +427,7 @@ deaths_mon |>
 
 ### Variables distribution
 
-Observing the variables, we found that they are all continuos variables. Thus in this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
+In this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
 
 #### Smoking rate
 
@@ -460,15 +458,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071.
+Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071. 
 
-Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values.
+Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. 
 
-Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion.
+Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion. 
 
-Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew.
+Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew. 
 
-Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean.
+Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean. 
 
 #### Obesity rate
 
@@ -499,15 +497,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range:The maximum value is 0.589, and the minimum value is 0.143.
+Range:The maximum value is 0.589, and the minimum value is 0.143. 
 
-Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values.
+Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. 
 
-Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion.
+Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion. 
 
-Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values.
+Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values. 
 
-Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean.
+Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean. 
 
 #### Food environment
 
@@ -538,15 +536,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range of Distribution: The minimum value is 0, and the maximum is 10.
+Range of Distribution: The minimum value is 0, and the maximum is 10. 
 
-Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446.
+Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446. 
 
-Dispersion: The relatively large variance (1.329) suggests a dispersed distribution.
+Dispersion: The relatively large variance (1.329) suggests a dispersed distribution. 
 
-Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values.
+Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values. 
 
-Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values.
+Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values. 
 
 #### Physical inactivity
 
@@ -577,15 +575,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The minimum value is 0.089, and the maximum is 0.504.
+Range: The minimum value is 0.089, and the maximum is 0.504. 
 
-Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266.
+Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266. 
 
-Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion.
+Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion. 
 
-Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values.
+Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. 
 
-Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean.
+Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. 
 
 #### Drinking rate
 
@@ -616,15 +614,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The minimum value is 0.065, and the maximum is 0.0.31.
+Range: The minimum value is 0.065, and the maximum is 0.0.31. 
 
-Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191.
+Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191. 
 
-Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion.
+Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion. 
 
-Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values.
+Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. 
 
-Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean.
+Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. 
 
 #### Uninsured rate
 
@@ -655,15 +653,16 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The minimum value is 0.024, and the maximum is 0.322.
+Range: The minimum value is 0.024, and the maximum is 0.322. 
 
-Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115.
+Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115. 
 
-Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion.
+Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
 
-Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values.
+Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values. 
 
 Kurtosis: The kurtosis value implies a distribution peak that is sharper than a normal distribution. This suggests a distribution with a concentration around the mean and heavier tails.
+
 
 #### Homicide
 
@@ -694,15 +693,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values.
+Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values. 
 
-Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data.
+Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data. 
 
-Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values.
+Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values. 
 
-Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values.
+Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values. 
 
-Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values.
+Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values. 
 
 #### Rural rate
 
@@ -733,15 +732,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The data ranges from 0 to 1.
+Range: The data ranges from 0 to 1. 
 
-Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58.
+Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58. 
 
-Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion.
+Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
 
-Skewness: Slight left-skewness suggests a tendency for smaller values.
+Skewness: Slight left-skewness suggests a tendency for smaller values. 
 
-Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails.
+Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails. 
 
 #### Below 18 rate
 
@@ -772,15 +771,15 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The data ranges from 0 to 0.417.
+Range: The data ranges from 0 to 0.417. 
 
-Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution.
+Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution. 
 
-Dispersion: The extremely low variance indicates that the data points are very close to the mean.
+Dispersion: The extremely low variance indicates that the data points are very close to the mean. 
 
-Skewness: Positive skewness suggests a tendency for slightly larger values.
+Skewness: Positive skewness suggests a tendency for slightly larger values. 
 
-Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails.
+Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. 
 
 #### Above 65 rate
 
@@ -811,21 +810,19 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The data ranges from 0.049 to 0.582.
+Range: The data ranges from 0.049 to 0.582. 
 
-Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197.
+Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197. 
 
-Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion.
+Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
 
-Skewness: Positive skewness suggests a tendency for slightly larger values.
+Skewness: Positive skewness suggests a tendency for slightly larger values. 
 
 Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails.
 
 ### Time series analysis of national cases and deaths.
 
-Next we aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. 
-
-Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
+We aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
 
 #### National cases
 
@@ -971,6 +968,7 @@ knitr::kable(tab)
 
 ### Regression trees
 
+```{r, echo = FALSE}
 var_select <- function(df) {
   df |> select(Smoke, Obesity, `Food Environment`, `Physical inactivity`, Drinking, Uninsured, `death_rate`)
 }
@@ -1073,7 +1071,7 @@ COVID data (cases & deaths): <https://usafacts.org/visualizations/coronavirus-co
 
 Social-economic data (poverty, unemployment, education, & population): <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
 
-### Data pre-processing
+### Detals on data pre-processing
 
 For COVID cases and deaths datasets, we formatted the county FIPS code such that it is a 5-digit string. The FIPS for statewide unallocated cases and deathes is assigned a new value "99999". Variables important to the study(countyFIPS, County Name, State, StateFIPS and the numbers at the end of each month from Jul 2020 to June 2021) are reserved. After that, the case and death numbers are renamed corresponding to each month. A new row for US representing the nationwide cases and deaths is added.
 
