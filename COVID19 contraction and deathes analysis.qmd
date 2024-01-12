@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "COVID-19 cases and deaths analysis"
 format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
@@ -7,19 +7,61 @@ execute:
   keep-md: true
 ---
 
-\## Links
 
-Github link: <https://github.com/wuyuntong/Group_Project>
+## Research question
 
-Data Source links:
+The COVID-19 crisis has wreaked havoc on the world economy and people's lives. In US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died of it as of mid-July, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021---a period marked by the peak severity of the pandemic and the coexistence of various policies. With the project, we aim to gain an understanding of how different factors and policies played a role during the pandemic.
 
-Health data (2021 CHR CSV Analytic Data): <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+First, our focus revolves around understanding the dynamics of the pandemic's progression within the US. It is crucial to delve into the data and find out whether there are tangible variations in the trends at some critical moments. For instance, we want to detect if there is a structural shift in the data following the implementation of policies to contain the spread of the virus. Also, we want to see if there is a dramatic increase in the confirmed cases or deaths during the outbreak of a new virus variant and how these numbers change as time goes by.
 
-COVID data (cases & deaths): <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
+Furthermore, recognizing that states are different in various manners, our analysis seeks to uncover patterns of COVID cases and deaths that may be influenced by these differences. Our investigation extends to labeling the counties using the available characteristics. This could be done by using clustering techniques, such that counties with similar characteristics could be categorized into a group and others with disparate characteristics could be categorized into separate groups.
 
-Social-economic data (poverty, unemployment, education, & population): <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
+Lastly, this project also incorporates a nationwide exploration of the covariates that may have impacted the transmission of the virus. The recent study by Almalki et al. (2022) analyzed the cases and death numbers in Guilford County and found that food access and health issues are correlated with COVID cases and deaths by 0.44% and 60%, respectively. In a similar fashion, we consider a larger pool of factors including unemployment, poverty rate, income level, insurance coverage, alcohol abuse, heavy smoking, etc. By delving into these factors, we want to find out the influences that contribute to the number of deaths and infected cases on a broader scale. The intended approach for use is leveraging the linear regression model, and we will evaluate how the model works with its forecasting accuracy.
 
-\## Description of data sources
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message=FALSE, warning = FALSE)
+```
+
+```{r, echo=FALSE, message= FALSE}
+here::i_am("Group_Project.Rproj")
+library(here)
+library(vroom)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+library(caret)
+library(tibble)
+library(rpart)
+library(rpart.plot)
+library(cowplot)
+library(stringr)
+library(factoextra)
+library(hopkins)
+library(forecast)
+library(lubridate)
+library(tseries)
+library(moments)
+set.seed(123)
+theme_set(theme_bw())
+```
+
+```{r, echo=FALSE, message=FALSE}
+health <- vroom(here("data", "analytic_data2021.csv"))
+cases <- vroom(here("data", "covid_confirmed_usafacts.csv"))
+deaths <- vroom(here("data", "covid_deaths_usafacts.csv"))
+edu <- vroom(here("data", "Education.csv"))
+pop <- vroom(here("data", "PopulationEstimates.csv"))
+pov <- vroom(here("data", "PovertyEstimates.csv"))
+ump <- vroom(here("data", "Unemployment.csv"))
+```
+
+## Data sets description
+
+  To get reliable results, we first identify the data we need and determine where to get accurate, comprehensive data. The most basic information we need is the daily cumulative number of cases and deaths in different regions, which are the target variables of our research. Additionally, health data are essential. Finally, social-economic data may also play a crucial role. For example, higher income levels may lead to more timely treatment after infection, thereby reducing mortality. Higher education levels may help prevent and control the epidemic, thereby slowing down the growth rate of the number of cases. When selecting data sources, we strive to choose official, comprehensive sources to ensure the authenticity and accuracy of the data.
+  Below are the descriptions of the data sources and variables.
+  
+### Description of data sources
 
 1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.
 
@@ -39,7 +81,43 @@ PovertyEstimates are model-based estimates from the U.S. Census Bureau's Small A
 
 The county and State unemployment rates are from the Bureau of Labor Statistics (BLS) Local Area Unemployment Statistics (LAUS) program. The Local Area Unemployment Statistics (LAUS) program is a federal-state cooperative effort in which monthly estimates of total employment and unemployment are prepared for over 7,600 areas. This file includes overall employment status by county in the United States from 2000 to 2022. Median household is from the U.S. Census Bureau's Small Area Income and Poverty Estimate (SAIPE) program as in the previous dataset. The number of unemployed for each county is selected for this study.
 
-## Description of variables
+### Basic information about the data files
+
+```{r, echo=FALSE}
+info <- function(df) {
+  data.frame(file_name = deparse(substitute(df)), row_number = nrow(df), col_number = ncol(df), missing_number = sum(is.na(df))) |> knitr::kable()
+}
+```
+
+```{r, echo=FALSE}
+info(health)
+```
+
+```{r, echo=FALSE}
+info(cases)
+```
+
+```{r, echo=FALSE}
+info(deaths)
+```
+
+```{r, echo=FALSE}
+info(edu)
+```
+
+```{r, echo=FALSE}
+info(pop)
+```
+
+```{r, echo=FALSE}
+info(pov)
+```
+
+```{r, echo=FALSE}
+info(ump)
+```
+
+### Description of variables
 
 Below is the description of variables that are used in the project after modification. For other variables, we refer interested readers to the data sources.
 
@@ -85,99 +163,7 @@ Total Deaths: Percentage of death number in period 7/1/2020 to 6/30/2021.
 
 Higher Education: Percentage of adults with a bachelor's degree or higher, 2017-21.
 
-## Description of data cleaning and joining
-
-For COVID cases and deaths datasets, we formatted the county FIPS code such that it is a 5-digit string. The FIPS for statewide unallocated cases and deathes is assigned a new value "99999". Variables important to the study(countyFIPS, County Name, State, StateFIPS and the numbers at the end of each month from Jul 2020 to June 2021) are reserved. After that, the case and death numbers are renamed corresponding to each month. A new row for US representing the nationwide cases and deaths is added.
-
-For social-economic datasets, we keep only the countyFIPS and variables mentioned in the section of variable description. For health dataset, we merged county FIPS and state FIPS such that the FIPS code is line with other datasets. The variables for study are selected and are changed from the string type to numeric. Almost all the columns are complete, with no missing values.
-
-For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. Missing values are deleted. The resulting final ones are cases_f and deaths_f. These two datasets are used for clustering and regression tasks.
-
-## Research question
-
-The COVID-19 crisis has wreaked havoc on the world economy and people's lives. In US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died of it as of mid-July, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021---a period marked by the peak severity of the pandemic and the coexistence of various policies. With the project, we aim to gain an understanding of how different factors and policies played a role during the pandemic.
-
-First, our focus revolves around understanding the dynamics of the pandemic's progression within the US. It is crucial to delve into the data and find out whether there are tangible variations in the trends at some critical moments. For instance, we want to detect if there is a structural shift in the data following the implementation of policies to contain the spread of the virus. Also, we want to see if there is a dramatic increase in the confirmed cases or deaths during the outbreak of a new virus variant and how these numbers change as time goes by.
-
-Furthermore, recognizing that states are different in various manners, our analysis seeks to uncover patterns of COVID cases and deaths that may be influenced by these differences. Our investigation extends to labeling the counties using the available characteristics. This could be done by using clustering techniques, such that counties with similar characteristics could be categorized into a group and others with disparate characteristics could be categorized into separate groups.
-
-Lastly, this project also incorporates a nationwide exploration of the covariates that may have impacted the transmission of the virus. The recent study by Almalki et al. (2022) analyzed the cases and death numbers in Guilford County and found that food access and health issues are correlated with COVID cases and deaths by 0.44% and 60%, respectively. In a similar fashion, we consider a larger pool of factors including unemployment, poverty rate, income level, insurance coverage, alcohol abuse, heavy smoking, etc. By delving into these factors, we want to find out the influences that contribute to the number of deaths and infected cases on a broader scale. The intended approach for use is leveraging the linear regression model, and we will evaluate how the model works with its forecasting accuracy.
-
-```{r, echo=FALSE, message= FALSE}
-here::i_am("Group_Project.Rproj")
-library(here)
-library(vroom)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(knitr)
-library(caret)
-library(tibble)
-library(rpart)
-library(rpart.plot)
-library(cowplot)
-library(stringr)
-library(factoextra)
-library(hopkins)
-library(forecast)
-library(lubridate)
-library(tseries)
-library(moments)
-set.seed(123)
-theme_set(theme_bw())
-```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE,message=FALSE, warning = FALSE)
-```
-
-```{r, echo=FALSE, message=FALSE}
-health <- vroom(here("data", "analytic_data2021.csv"))
-cases <- vroom(here("data", "covid_confirmed_usafacts.csv"))
-deaths <- vroom(here("data", "covid_deaths_usafacts.csv"))
-edu <- vroom(here("data", "Education.csv"))
-pop <- vroom(here("data", "PopulationEstimates.csv"))
-pov <- vroom(here("data", "PovertyEstimates.csv"))
-ump <- vroom(here("data", "Unemployment.csv"))
-```
-
-## Basic information about the data files
-
-```{r, echo=FALSE}
-info <- function(df) {
-  data.frame(file_name = deparse(substitute(df)), row_number = nrow(df), col_number = ncol(df), missing_number = sum(is.na(df))) |> knitr::kable()
-}
-```
-
-```{r, echo=FALSE}
-info(health)
-```
-
-```{r, echo=FALSE}
-info(cases)
-```
-
-```{r, echo=FALSE}
-info(deaths)
-```
-
-```{r, echo=FALSE}
-info(edu)
-```
-
-```{r, echo=FALSE}
-info(pop)
-```
-
-```{r, echo=FALSE}
-info(pov)
-```
-
-```{r, echo=FALSE}
-info(ump)
-```
-
-## Data pre-processing
+## Data analysis
 
 ```{r, echo=FALSE}
 cov_clean <- function(df) {
@@ -335,7 +321,7 @@ deaths_f$Poverty <- deaths_f$Poverty / deaths_f$Population
 deaths_f$Unemployed <- deaths_f$Unemployed / deaths_f$Population
 ```
 
-## Graphic representation of target variables
+### Graphic representation of target variables
 
 ```{r, echo=FALSE, warning=FALSE}
 cases_mon |>
@@ -418,15 +404,6 @@ deaths_mon |>
 ```
 
 ```{r, echo=FALSE}
-deaths_mon |>
-  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
-  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = 1)) +
-  geom_line() +
-  labs(title = "Nationwide total deaths reported from July 2020 to June 2021")
-```
-
-```{r, echo=FALSE}
 cases_mon |>
   summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
   pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
@@ -448,11 +425,15 @@ deaths_mon |>
   labs(title = "Nationwide new deaths reported from August 2020 to June 2021")
 ```
 
-## Variables distribution
+### Variables distribution
 
 In this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
 
+<<<<<<< HEAD
 ### Smoking rate
+=======
+#### Smoking rate
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = Smoke)) +
@@ -481,7 +462,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion. Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew. Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean. \### Obesity rate
+=======
+Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071. 
+
+Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. 
+
+Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion. 
+
+Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew. 
+
+Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean. 
+
+#### Obesity rate
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = Obesity)) +
@@ -510,7 +505,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range:The maximum value is 0.589, and the minimum value is 0.143. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion. Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values. Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean. \### Food environment
+=======
+Range:The maximum value is 0.589, and the minimum value is 0.143. 
+
+Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. 
+
+Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion. 
+
+Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values. 
+
+Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean. 
+
+#### Food environment
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Food Environment`)) +
@@ -539,7 +548,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range of Distribution: The minimum value is 0, and the maximum is 10. Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446. Dispersion: The relatively large variance (1.329) suggests a dispersed distribution. Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values. Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values. \### Physical inactivity
+=======
+Range of Distribution: The minimum value is 0, and the maximum is 10. 
+
+Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446. 
+
+Dispersion: The relatively large variance (1.329) suggests a dispersed distribution. 
+
+Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values. 
+
+Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values. 
+
+#### Physical inactivity
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Physical inactivity`)) +
@@ -568,7 +591,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range: The minimum value is 0.089, and the maximum is 0.504. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266. Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. \### Drinking rate
+=======
+Range: The minimum value is 0.089, and the maximum is 0.504. 
+
+Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266. 
+
+Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion. 
+
+Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. 
+
+Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. 
+
+#### Drinking rate
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Drinking`)) +
@@ -597,7 +634,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range: The minimum value is 0.065, and the maximum is 0.0.31. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191. Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. \### Uninsured rate
+=======
+Range: The minimum value is 0.065, and the maximum is 0.0.31. 
+
+Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191. 
+
+Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion. 
+
+Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. 
+
+Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. 
+
+#### Uninsured rate
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Uninsured`)) +
@@ -626,7 +677,22 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range: The minimum value is 0.024, and the maximum is 0.322. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value implies a distribution peak that is sharper than a normal distribution. This suggests a distribution with a concentration around the mean and heavier tails. \### Homicide
+=======
+Range: The minimum value is 0.024, and the maximum is 0.322. 
+
+Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115. 
+
+Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
+
+Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values. 
+
+Kurtosis: The kurtosis value implies a distribution peak that is sharper than a normal distribution. This suggests a distribution with a concentration around the mean and heavier tails.
+
+
+#### Homicide
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Homicide`)) +
@@ -655,7 +721,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values. Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data. Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values. Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values. Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values. \### Rural rate
+=======
+Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values. 
+
+Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data. 
+
+Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values. 
+
+Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values. 
+
+Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values. 
+
+#### Rural rate
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Rural`)) +
@@ -684,7 +764,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range: The data ranges from 0 to 1. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Slight left-skewness suggests a tendency for smaller values. Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails. \### Below 18 rate
+=======
+Range: The data ranges from 0 to 1. 
+
+Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58. 
+
+Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
+
+Skewness: Slight left-skewness suggests a tendency for smaller values. 
+
+Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails. 
+
+#### Below 18 rate
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Below 18`)) +
@@ -713,7 +807,21 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range: The data ranges from 0 to 0.417. Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution. Dispersion: The extremely low variance indicates that the data points are very close to the mean. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. \### Above 65 rate
+=======
+Range: The data ranges from 0 to 0.417. 
+
+Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution. 
+
+Dispersion: The extremely low variance indicates that the data points are very close to the mean. 
+
+Skewness: Positive skewness suggests a tendency for slightly larger values. 
+
+Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. 
+
+#### Above 65 rate
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r}
 ggplot(data = health_c, aes(x = `Above 65`)) +
@@ -742,13 +850,27 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
+<<<<<<< HEAD
 Range: The data ranges from 0.049 to 0.582. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails.
 
 ## Time series analysis of national cases and deaths.
+=======
+Range: The data ranges from 0.049 to 0.582. 
+
+Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197. 
+
+Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
+
+Skewness: Positive skewness suggests a tendency for slightly larger values. 
+
+Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails.
+
+### Time series analysis of national cases and deaths.
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 We aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
 
-### National cases
+#### National cases
 
 ```{r}
 national_cases <- cases |>
@@ -778,7 +900,7 @@ plot(forecast(model_case,h=65))
 lines(test_case,lwd=2,col='red')
 ```
 
-### National deaths
+#### National deaths
 
 ```{r}
 national_deaths <- deaths |>
@@ -809,7 +931,7 @@ plot(forecast(model_death,h=65))
 lines(test_death,lwd=2,col='red')
 ```
 
-### Relationship between national cases and deaths
+#### Relationship between national cases and deaths
 
 Besides examining the correlation between cases and deaths themselves, we also aim to determine if there is a significant relationship between cases and deaths. We opted for linear regression in this case. The results of the linear regression indicate a significant linear correlation between deaths and cases, implying that the virus's fatality rate is maybe a constant value, around 1.53%.
 
@@ -827,7 +949,7 @@ ggplot(national_data,aes(x = Cases, y = Deaths)) +
 summary(c_relation)
 ```
 
-## Clustering analysis
+### Clustering analysis
 
 ```{r, echo=FALSE}
 df1 <- cases_f[, c("Higher Education", "Population", "Total Deaths", "Poverty", "Median Income", "Unemployed", "Homicide", "Rural", "Below 18", "Above 65")]
@@ -1817,6 +1939,7 @@ knitr::kable(tab)
 ```
 
 ### Regression tree analysis
+<<<<<<< HEAD
 
 ```{r, echo = FALSE}
 var_select <- function(df) {
@@ -1930,6 +2053,8 @@ For social-economic datasets, we keep only the countyFIPS and variables mentione
 For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. Missing values are deleted. The resulting final ones are cases_f and deaths_f. These two datasets are used for clustering and regression tasks.
 
 ## Regression tree analysis
+=======
+>>>>>>> c77ec490bd6da5416ee08bef2bd399006a593dc3
 
 ```{r, echo = FALSE}
 var_select <- function(df) {
@@ -2019,3 +2144,25 @@ plot_grid(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2, align = "v", labels = 
 ## References
 
 Almalki A, Gokaraju B, Acquaah Y, Turlapaty A. (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
+
+## Annex
+
+### Links
+
+Github link: <https://github.com/wuyuntong/Group_Project>
+
+Data Source links:
+
+Health data (2021 CHR CSV Analytic Data): <https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation>
+
+COVID data (cases & deaths): <https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/>
+
+Social-economic data (poverty, unemployment, education, & population): <https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/>
+
+### Description of data cleaning and joining
+
+For COVID cases and deaths datasets, we formatted the county FIPS code such that it is a 5-digit string. The FIPS for statewide unallocated cases and deathes is assigned a new value "99999". Variables important to the study(countyFIPS, County Name, State, StateFIPS and the numbers at the end of each month from Jul 2020 to June 2021) are reserved. After that, the case and death numbers are renamed corresponding to each month. A new row for US representing the nationwide cases and deaths is added.
+
+For social-economic datasets, we keep only the countyFIPS and variables mentioned in the section of variable description. For health dataset, we merged county FIPS and state FIPS such that the FIPS code is line with other datasets. The variables for study are selected and are changed from the string type to numeric. Almost all the columns are complete, with no missing values.
+
+For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. Missing values are deleted. The resulting final ones are cases_f and deaths_f. These two datasets are used for clustering and regression tasks.
