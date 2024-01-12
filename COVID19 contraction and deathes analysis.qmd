@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "COVID-19 cases and deaths analysis"
 format: html
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
@@ -58,6 +58,9 @@ ump <- vroom(here("data", "Unemployment.csv"))
 
 ## Data sets description
 
+  To get reliable results, we first identify the data we need and determine where to get accurate, comprehensive data. The most basic information we need is the daily cumulative number of cases and deaths in different regions, which are the target variables of our research. Additionally, health data are essential. Finally, social-economic data may also play a crucial role. For example, higher income levels may lead to more timely treatment after infection, thereby reducing mortality. Higher education levels may help prevent and control the epidemic, thereby slowing down the growth rate of the number of cases. When selecting data sources, we strive to choose official, comprehensive sources to ensure the authenticity and accuracy of the data.
+  Below are the descriptions of the data sources and variables.
+  
 ### Description of data sources
 
 1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.
