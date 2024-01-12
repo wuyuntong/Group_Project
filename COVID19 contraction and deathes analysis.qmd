@@ -453,6 +453,7 @@ deaths_mon |>
 In this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
 
 ### Smoking rate
+
 ```{r}
 ggplot(data = health_c, aes(x = Smoke)) +
   geom_histogram(color = "black",bins = 50)  +
@@ -479,8 +480,9 @@ health_c |>
     kurtosis = kurtosis(Smoke,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion. Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew. Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean.
-### Obesity rate
+
+Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion. Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew. Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean. \### Obesity rate
+
 ```{r}
 ggplot(data = health_c, aes(x = Obesity)) +
   geom_histogram(color = "black",bins = 50) +
@@ -507,8 +509,9 @@ health_c |>
     kurtosis = kurtosis(Obesity,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range:The maximum value is 0.589, and the minimum value is 0.143. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion. Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values. Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean.
-### Food environment
+
+Range:The maximum value is 0.589, and the minimum value is 0.143. Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion. Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values. Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean. \### Food environment
+
 ```{r}
 ggplot(data = health_c, aes(x = `Food Environment`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -535,8 +538,9 @@ health_c |>
     kurtosis = kurtosis(`Food Environment`,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range of Distribution: The minimum value is 0, and the maximum is 10. Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446. Dispersion: The relatively large variance (1.329) suggests a dispersed distribution. Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values. Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values.
-### Physical inactivity
+
+Range of Distribution: The minimum value is 0, and the maximum is 10. Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446. Dispersion: The relatively large variance (1.329) suggests a dispersed distribution. Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values. Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values. \### Physical inactivity
+
 ```{r}
 ggplot(data = health_c, aes(x = `Physical inactivity`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -563,8 +567,9 @@ health_c |>
     kurtosis = kurtosis(`Physical inactivity`,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range: The minimum value is 0.089, and the maximum is 0.504. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266. Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean.
-### Drinking rate
+
+Range: The minimum value is 0.089, and the maximum is 0.504. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266. Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. \### Drinking rate
+
 ```{r}
 ggplot(data = health_c, aes(x = `Drinking`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -591,8 +596,9 @@ health_c |>
     kurtosis = kurtosis(`Drinking`,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range: The minimum value is 0.065, and the maximum is 0.0.31. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191. Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean.
-### Uninsured rate
+
+Range: The minimum value is 0.065, and the maximum is 0.0.31. Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191. Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. \### Uninsured rate
+
 ```{r}
 ggplot(data = health_c, aes(x = `Uninsured`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -619,8 +625,9 @@ health_c |>
     kurtosis = kurtosis(`Uninsured`,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range: The minimum value is 0.024, and the maximum is 0.322. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value implies a distribution peak that is sharper than a normal distribution. This suggests a distribution with a concentration around the mean and heavier tails. 
-### Homicide
+
+Range: The minimum value is 0.024, and the maximum is 0.322. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values. Kurtosis: The kurtosis value implies a distribution peak that is sharper than a normal distribution. This suggests a distribution with a concentration around the mean and heavier tails. \### Homicide
+
 ```{r}
 ggplot(data = health_c, aes(x = `Homicide`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -647,8 +654,9 @@ health_c |>
     kurtosis = kurtosis(`Homicide`,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values. Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data. Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values. Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values. Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values. 
-### Rural rate
+
+Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values. Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data. Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values. Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values. Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values. \### Rural rate
+
 ```{r}
 ggplot(data = health_c, aes(x = `Rural`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -675,8 +683,9 @@ health_c |>
     kurtosis = kurtosis(`Rural`,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range: The data ranges from 0 to 1. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Slight left-skewness suggests a tendency for smaller values. Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails. 
-### Below 18 rate
+
+Range: The data ranges from 0 to 1. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Slight left-skewness suggests a tendency for smaller values. Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails. \### Below 18 rate
+
 ```{r}
 ggplot(data = health_c, aes(x = `Below 18`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -703,8 +712,9 @@ health_c |>
     kurtosis = kurtosis(`Below 18`,na.rm = TRUE)) |>
   knitr::kable(digits = 3)
 ```
-Range: The data ranges from 0 to 0.417. Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution. Dispersion: The extremely low variance indicates that the data points are very close to the mean. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. 
-### Above 65 rate
+
+Range: The data ranges from 0 to 0.417. Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution. Dispersion: The extremely low variance indicates that the data points are very close to the mean. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. \### Above 65 rate
+
 ```{r}
 ggplot(data = health_c, aes(x = `Above 65`)) +
   geom_histogram(color = "black",bins = 50) +
@@ -732,12 +742,7 @@ health_c |>
   knitr::kable(digits = 3)
 ```
 
-Range: The data ranges from 0.049 to 0.582. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. 
-
-
-
-
-
+Range: The data ranges from 0.049 to 0.582. Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197. Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. Skewness: Positive skewness suggests a tendency for slightly larger values. Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails.
 
 ## Time series analysis of national cases and deaths.
 
@@ -840,7 +845,7 @@ fviz_nbclust(df, kmeans, method = "wss") +
   labs(subtitle = "Elbow method")
 ```
 
-We implement k-means clustering with a predetermined value of 4 for better understanding the underlying patterns in the data. As the data contain more than two variables, we use principal component analysis (PCA) to reduce the dimensionality and provide a scatter plot. As depicted in the 2-D cluster plot. The first principal component accounts for 44.4% of the total variation, while the second component explains an additional 12.8%. The cluster plot below indicates the presence of 4 meaningful clusters within the dataset in spite of some overlap between the clusters (especially between cluster 2 and 4).
+We implement k-means clustering with a predetermined value of 4 for better understanding the underlying patterns in the data. As the data contain more than two variables, we use principal component analysis (PCA) to reduce the dimensionality and provide a scatter plot. As depicted in the 2-D cluster plot. The first principal component accounts for 41.8% of the total variation, while the second component explains an additional 19.5%. The cluster plot below indicates the presence of 4 discernible clusters within the dataset in spite of some overlap between the clusters (especially between cluster 2 and 4).
 
 ```{r, echo=FALSE}
 km.res <- eclust(df, "kmeans", k = 4, nstart = 25, graph = FALSE)
@@ -848,7 +853,7 @@ fviz_cluster(km.res, geom = "point", ellipse.type = "norm",
              palette = "jco", ggtheme = theme_minimal())
 ```
 
-The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[3]` data points. These 4 clusters can be characterized by the distribution of the variables within each cluster. Cluster 3, in particular, has the highest homicide rate, rural rate, poverty and total death rate. It also has the smallest population, lowest higher education rate and median income. We therefore give it the label 'Small rural cities with more poverty and less education'. In contrast, cluster 4 has pretty good social results among the social-economic factors with highest higher education, median income but least homicide, rural rate total deaths, and poverty. We thus gives it the label "Big cities with more wealth and education". For clusters 1 and 4, they both perform better than cluster 2 but not as well as cluster 3. On the other hand, cluster 4 outperforms cluster 1 in health indicators and social economic factors, therefore, we label cluster 1 as "Less healthy, low-to-middle-income, median cities" and cluster 4 as "Healthier, median-to-high-income, median cities". In addition, unemployment does not seem to be a discriminating factor as all resulting clusters maintain an unemployment rate around 20%. We also notice that excessive drinking is more related to healthier regions with more population and higher income.
+The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[4]` data points. These 4 clusters can be characterized by the distribution of the variables within each cluster. Cluster 3, in particular, has the highest homicide rate, rural rate, poverty and total death rate. It also has the smallest population, lowest higher education rate and median income. We therefore give it the label 'Small rural towns with more poverty and less education'. In contrast, cluster 4 has pretty good results among the social-economic factors with highest higher education, median income but least homicide, rural rate total deaths, and poverty. We thus gives it the label "Big cities with more wealth and education". For clusters 1 and 2, their poverty, median income, total death rate, population, homicide, rural and higher education are between cluster 3 and cluster 4. Cluster 2 outperforms cluster 1 in many factors in terms of higher education rate, less total death rates, higher median income and less poverty, though the homicide rate is a bit higher. We notice that these indicators are similar to the national level, but with less homicide and being less rural. We thus provide it with the label "Median cities averaging to national level". Finally, cluster 1 has higher education, population, poverty and median income below the national level. Noticeably, it is more rural, has more elder population percentage(less children/teenager percentage). Therefore, it is labeled as "rural areas with higher elder population". The unemployment does not seem to be a discriminating factor as most of them are around the national level rate even though there tends to be more in bigger cities.
 
 ```{r, echo=FALSE}
 cases_f$Cluster <- km.res$cluster
@@ -859,12 +864,17 @@ cl3 <- cases_f[cases_f$Cluster == 3,]
 cl4 <- cases_f[cases_f$Cluster == 4,]
 clusters <- list(cl1, cl2, cl3, cl4)
 
-tab <- matrix(data=NA, nrow=11, ncol=5)
-tab[1,] <- c('', 'Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4')
+tab <- matrix(data=NA, nrow=11, ncol=6)
+tab[1,] <- c('', 'Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4', 'National')
 tab[,1] <- c("", "Homicide", "Rural", "Higher Education", "Population", "Total Deaths", "Poverty", "Median Income", "Unemployed", "Below 18", "Above 65")
 
-for (i in c(1,2,3,4)) {
-  cluster <- clusters[[i]]
+for (i in 1:5) {
+  if (i %in% c(1, 2, 3, 4)) {
+    cluster <- clusters[[i]]
+  } else {
+    cluster <- cases_f
+  }
+
   tab[2, 1+i] <- round(mean(cluster$Homicide), 4)
   tab[3, 1+i] <- round(mean(cluster$Rural), 4)
   tab[4, 1+i] <- round(mean(cluster$`Higher Education`), 4)
@@ -878,6 +888,7 @@ for (i in c(1,2,3,4)) {
 }
 
 knitr::kable(tab)
+
 ```
 
 ## Regression tree analysis
