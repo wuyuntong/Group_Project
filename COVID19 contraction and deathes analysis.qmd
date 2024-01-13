@@ -166,9 +166,7 @@ Higher Education: Percentage of adults with a bachelor's degree or higher, 2017-
 
 ## Data analysis
 
-As we can see from the charts below, the number of cases continues to increase across the country. The growth rate was fastest from 2020-10 to 2021-01. Then the growth rate gradually declined after 2021-01, but the cumulative number of cases still showed an obvious upward trend. The number of new cases has increased sharply since 2020-10, peaking in 2020-12 and then declining rapidly. From the state level, the peaks of new cases basically occur between 2020-10 and 2021-01. 
-
-At the same time, the number of deaths nationwide has also shown a continuous growth trend, with the fastest growth from 2020-11 to 2021-02. Compared to the number of cases, there is a delay of about a month. Similarly, the number of new deaths peaked in 2021-01 and then showed a clear downward trend.
+After obtaining reliable data, we analyze the data from several aspects. Firstly, we present the overall graphical representations of the data, qualitatively discussing the trends in cumulative cases and deaths, as well as new cases and new deaths. Secondly, we conduct time series analysis on the national total cases and deaths, examining whether there are temporal correlations. We fit an ARIMA model to quantitatively analyze the trend of data over time. Subsequently, we employ the K-means clustering analysis method to cluster different countries. Finally, we use the regression tree method to analyse the impact of various variables on the death rate.
 
 ```{r, echo=FALSE}
 cov_clean <- function(df) {
@@ -327,6 +325,10 @@ deaths_f$Unemployed <- deaths_f$Unemployed / deaths_f$Population
 ```
 
 ### Graphic representation of target variables
+
+As we can see from the charts below, the number of cases continues to increase across the country. The growth rate was fastest from 2020-10 to 2021-01. Then the growth rate gradually declined after 2021-01, but the cumulative number of cases still showed an obvious upward trend. The number of new cases has increased sharply since 2020-10, peaking in 2020-12 and then declining rapidly. From the state level, the peaks of new cases basically occur between 2020-10 and 2021-01. 
+
+At the same time, the number of deaths nationwide has also shown a continuous growth trend, with the fastest growth from 2020-11 to 2021-02. Compared to the number of cases, there is a delay of about a month. Similarly, the number of new deaths peaked in 2021-01 and then showed a clear downward trend.
 
 ```{r, echo=FALSE, warning=FALSE}
 cases_mon |>
