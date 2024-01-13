@@ -59,6 +59,7 @@ ump <- vroom(here("data", "Unemployment.csv"))
 ## Data sets description
 
   To get reliable results, we first identify the data we need and determine where to get accurate, comprehensive data. The most basic information we need is the daily cumulative number of cases and deaths in different regions, which are the target variables of our research. Additionally, health data are essential. Finally, social-economic data may also play a crucial role. For example, higher income levels may lead to more timely treatment after infection, thereby reducing mortality. Higher education levels may help prevent and control the epidemic, thereby slowing down the growth rate of the number of cases. When selecting data sources, we strive to choose official, comprehensive sources to ensure the authenticity and accuracy of the data.
+  
   Below are the descriptions of the data sources and variables.
   
 ### Description of data sources
@@ -164,6 +165,10 @@ Total Deaths: Percentage of death number in period 7/1/2020 to 6/30/2021.
 Higher Education: Percentage of adults with a bachelor's degree or higher, 2017-21.
 
 ## Data analysis
+
+As we can see from the charts below, the number of cases continues to increase across the country. The growth rate was fastest from 2020-10 to 2021-01. Then the growth rate gradually declined after 2021-01, but the cumulative number of cases still showed an obvious upward trend. The number of new cases has increased sharply since 2020-10, peaking in 2020-12 and then declining rapidly. From the state level, the peaks of new cases basically occur between 2020-10 and 2021-01. 
+
+At the same time, the number of deaths nationwide has also shown a continuous growth trend, with the fastest growth from 2020-11 to 2021-02. Compared to the number of cases, there is a delay of about a month. Similarly, the number of new deaths peaked in 2021-01 and then showed a clear downward trend.
 
 ```{r, echo=FALSE}
 cov_clean <- function(df) {
@@ -427,7 +432,7 @@ deaths_mon |>
 
 ### Variables distribution
 
-In this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
+Observing the variables, we found that they are all continuos variables. Thus in this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
 
 #### Smoking rate
 
@@ -822,7 +827,9 @@ Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tail
 
 ### Time series analysis of national cases and deaths.
 
-We aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021. Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
+Next we aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021.
+
+Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
 
 #### National cases
 
