@@ -25,6 +25,17 @@ knitr::opts_chunk$set(echo = FALSE,message=FALSE, warning = FALSE)
 
 ```{r, echo=FALSE, message= FALSE}
 here::i_am("Group_Project.Rproj")
+
+required_packages <- c("caret", "tibble", "rpart", "rpart.plot", "cowplot", "sringr", "factoextra", "hopkins", "forecast", "lubridate", "tseries", "moments")
+
+install_missing_packages <- function(packages) {
+  new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+  if(length(new_packages) > 0) {
+    install.packages(new_packages, dependencies = TRUE)
+  }
+}
+install_missing_packages(required_packages)
+
 library(here)
 library(vroom)
 library(dplyr)
@@ -43,6 +54,7 @@ library(forecast)
 library(lubridate)
 library(tseries)
 library(moments)
+
 set.seed(123)
 theme_set(theme_bw())
 ```
