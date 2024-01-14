@@ -7,7 +7,6 @@ execute:
   keep-md: true
 ---
 
-
 ## Research question
 
 The COVID-19 crisis has wreaked havoc on the world economy and people's lives. In the US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died as of mid-July, 2023, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021---a period marked by the peak severity of the pandemic and the coexistence of various policies. With the project, we aim to gain an understanding of how different factors played a role during the pandemic.
@@ -18,24 +17,12 @@ Furthermore, recognizing that the counties are different in various manners, our
 
 Lastly, this project also incorporates a nationwide exploration of the covariates that contribute to severity of deaths caused by COVID. We consider a pool of health-related factors, including smoking, drinking, obesity, food and environment, and insurance coverage to study their effects. Our chosen methodology involves utilizing regression trees to unravel the inter-relationship with the tree structure for each cluster. This approach also provides a measure of the importance for the factors in COVID caused deaths.
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE,message=FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
-```{r, echo=FALSE, message= FALSE}
+```{r, echo=FALSE, message= FALSE, warning= FALSE}
 here::i_am("Group_Project.Rproj")
-
-required_packages <- c("caret", "tibble", "rpart", "rpart.plot", "cowplot", "sringr", "factoextra", "hopkins", "forecast", "lubridate", "tseries", "moments")
-
-install_missing_packages <- function(packages) {
-  new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
-  if(length(new_packages) > 0) {
-    install.packages(new_packages, dependencies = TRUE)
-  }
-}
-install_missing_packages(required_packages)
-
 library(here)
 library(vroom)
 library(dplyr)
@@ -47,6 +34,7 @@ library(tibble)
 library(rpart)
 library(rpart.plot)
 library(cowplot)
+library(patchwork)
 library(stringr)
 library(factoextra)
 library(hopkins)
@@ -71,10 +59,10 @@ ump <- vroom(here("data", "Unemployment.csv"))
 
 ## Data sets description
 
-  To get reliable results, we first identify the data we need and determine where to get accurate, comprehensive data. The most basic information we need is the daily cumulative number of cases and deaths in different regions, which are the target variables of our research. Additionally, health data are essential. Finally, social-economic data may also play a crucial role. For example, higher income levels may lead to more timely treatment after infection, thereby reducing mortality. Higher education levels may help prevent and control the epidemic, thereby slowing down the growth rate of the number of cases. When selecting data sources, we strive to choose official, comprehensive sources to ensure the authenticity and accuracy of the data.
-  
-  Below are the descriptions of the data sources and variables.
-  
+To get reliable results, we first identify the data we need and determine where to get accurate, comprehensive data. The most basic information we need is the daily cumulative number of cases and deaths in different regions, which are the target variables of our research. Additionally, health data are essential. Finally, social-economic data may also play a crucial role. For example, higher income levels may lead to more timely treatment after infection, thereby reducing mortality. Higher education levels may help prevent and control the epidemic, thereby slowing down the growth rate of the number of cases. When selecting data sources, we strive to choose official, comprehensive sources to ensure the authenticity and accuracy of the data.
+
+Below are the descriptions of the data sources and variables.
+
 ### Description of data sources
 
 1.Health data: The file analytic_data2021 comes from the County Health Rankings & Roadmaps (CHR&R). County Health Rankings & Roadmaps (CHR&R) is a program of the University of Wisconsin Population Health Institute. The CHR&R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.
@@ -186,17 +174,18 @@ cov_clean <- function(df) {
   df$countyFIPS <- df$countyFIPS |>
     as.character() |>
     str_pad(5, pad = "0")
-  
+
   df$countyFIPS <- ifelse(df$`County Name` == "Statewide Unallocated", "99999", df$countyFIPS)
-  
+
   df <- df |>
     select(
-      countyFIPS, `County Name`, State, StateFIPS,
+      countyFIPS, `County Name`, State, StateFIPS, `2020-06-30`,
       `2020-07-31`, `2020-08-31`, `2020-09-30`, `2020-10-31`,
       `2020-11-30`, `2020-12-31`, `2021-01-31`, `2021-02-28`,
       `2021-03-31`, `2021-04-30`, `2021-05-31`, `2021-06-30`
     ) |>
     rename(
+      `2020-06` = `2020-06-30`,
       `2020-07` = `2020-07-31`,
       `2020-08` = `2020-08-31`,
       `2020-09` = `2020-09-30`,
@@ -210,12 +199,13 @@ cov_clean <- function(df) {
       `2021-05` = `2021-05-31`,
       `2021-06` = `2021-06-30`
     )
-  
+
   US <- data.frame(
     countyFIPS = "00000",
     `County Name` = "United States",
     State = NA,
     StateFIPS = NA,
+    `2020-06` = NA,
     `2020-07` = NA,
     `2020-08` = NA,
     `2020-09` = NA,
@@ -230,7 +220,7 @@ cov_clean <- function(df) {
     `2021-06` = NA,
     check.names = FALSE
   )
-  
+
   df <- bind_rows(US, df)
 }
 ```
@@ -337,11 +327,9 @@ deaths_f$Poverty <- deaths_f$Poverty / deaths_f$Population
 deaths_f$Unemployed <- deaths_f$Unemployed / deaths_f$Population
 ```
 
-### Graphic representation of target variables
+The visual representations below shows a persistent increase in the n the overall count of COVID-19 infection cases and associated deaths, characterized by an S-shaped curve. Notably, these two numbers are marked by a slow and steady increase in the period from July 2020 and October 2020. During the winter months (November 2020 to January 2021), a dramatic surge is evident across all states, contributing to a substantial spike in both new cases and deaths. In subsequent months (Feburary 2021 to June 2021), the new cases and deaths slow down to the initial level. Nevertheless,there appears to be a small peak in March and April 2021, when the delta variant becomes prevalent in the states.
 
-As we can see from the charts below, the number of cases continues to increase across the country. The growth rate was fastest from 2020-10 to 2021-01. Then the growth rate gradually declined after 2021-01, but the cumulative number of cases still showed an obvious upward trend. The number of new cases has increased sharply since 2020-10, peaking in 2020-12 and then declining rapidly. From the state level, the peaks of new cases basically occur between 2020-10 and 2021-01. 
-
-At the same time, the number of deaths nationwide has also shown a continuous growth trend, with the fastest growth from 2020-11 to 2021-02. Compared to the number of cases, there is a delay of about a month. Similarly, the number of new deaths peaked in 2021-01 and then showed a clear downward trend.
+Geographically, the distribution of cases and deaths is more pronounced in densely populated, urbanized and prosperous regions, such as California, New York state, and Texas, while relatively fewer incidents are observed in rural and sparsely populated areas. The spatial imbalance motivates our exploration into the nuanced relationships between COVID-19 cases, deaths, and various contributing factors by segmenting the different regions to better understand dynamics at play.
 
 ```{r, echo=FALSE, warning=FALSE}
 cases_mon |>
@@ -405,506 +393,196 @@ deaths_mon |>
   )
 ```
 
-```{r, echo=FALSE}
-cases_mon |>
-  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
-  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = 1)) +
-  geom_line() +
-  labs(title = "Nationwide total cases reported from July 2020 to June 2021")
-```
+### An inspection on covariates
 
-```{r, echo=FALSE}
-deaths_mon |>
-  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
-  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  ggplot(aes(x = month, y = count, group = 1)) +
-  geom_line() +
-  labs(title = "Nationwide total deaths reported from July 2020 to June 2021")
-```
-
-```{r, echo=FALSE}
-cases_mon |>
-  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
-  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  mutate_at(vars(count), list(~ .x - lag(.x))) |>
-  na.omit() |>
-  ggplot(aes(x = month, y = count, group = 1)) +
-  geom_line() +
-  labs(title = "Nationwide new cases reported from August 2020 to June 2021")
-```
-
-```{r, echo=FALSE}
-deaths_mon |>
-  summarise(across(starts_with("202"), sum, na.rm = TRUE)) |>
-  pivot_longer(cols = starts_with("202"), names_to = "month", values_to = "count") |>
-  mutate_at(vars(count), list(~ .x - lag(.x))) |>
-  na.omit() |>
-  ggplot(aes(x = month, y = count, group = 1)) +
-  geom_line() +
-  labs(title = "Nationwide new deaths reported from August 2020 to June 2021")
-```
-
-### Variables distribution
-
-Observing the variables, we found that they are all continuos variables. Thus in this section, we will use national county-level data to graphically display and describe the distribution of variables in terms of frequency distribution, density curves, and indicators such as mean, variance, skewness and kurtosis.
-
-#### Smoking rate
+We now leverage national county-level data to explicate the distribution characteristics of the factors associated with each county. In the context of health-related factors, certain variables exhibit normality, for example, smoking, drinking, obesity, and uninsurance, with skewness values proximate to 0 and kurtosis close to 3. In addition, physical inactivity is characterized by unskewness and thinner tails, suggesting low probabilities for cases of extrem low or high inactivity rates. The food environment index, in contrast, is more left-skewed and fatter tailed. This implies that quite a few counties have relatively unhealthy food environment.
 
 ```{r}
-ggplot(data = health_c, aes(x = Smoke)) +
-  geom_histogram(color = "black",bins = 50)  +
-  labs(title = "Distribution of smoking rate", x = "Smoking rate", y = "Frequency")
-ggplot(data = health_c, aes(x = Smoke)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(Smoke,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+  
-  geom_vline(aes(xintercept = median(Smoke,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(Smoke, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(Smoke, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(Smoke,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -25) +
-  geom_text(aes(x = median(Smoke,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -24,hjust=-0.3) +
-  geom_text(aes(x = quantile(Smoke, 0.25,na.rm = TRUE), y = 0.25, label = "25%"), vjust = -1) +
-  geom_text(aes(x = quantile(Smoke, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -1)+
-  labs(title = "Density Curve", x = "Smoking rate",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(Smoke)),
-            max=max(Smoke,na.rm = TRUE),
-            min=min(Smoke,na.rm = TRUE),
-    mean = mean(Smoke,na.rm = TRUE),
-    median = median(Smoke,na.rm = TRUE),
-    variance = var(Smoke,na.rm = TRUE),
-    skewness = skewness(Smoke,na.rm = TRUE),
-    kurtosis = kurtosis(Smoke,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
+p_smoke <- ggplot(data = cases_f, aes(x = Smoke)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Smoking rate", y = "Frequency")
+
+p_obes <- ggplot(data = cases_f, aes(x = Obesity)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Obesity rate", y = "Frequency")
+
+p_food <- ggplot(data = cases_f, aes(x = `Food Environment`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Food Environment", y = "Frequency")
+
+p_phys <- ggplot(data = cases_f, aes(x = `Physical inactivity`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Physical inactivity", y = "Frequency")
+
+p_drink <- ggplot(data = cases_f, aes(x = `Drinking`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Drinking rate", y = "Frequency")
+
+p_unins <- ggplot(data = cases_f, aes(x = `Uninsured`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Uninsured rate", y = "Frequency")
+
+plot_grid(p_smoke, p_obes, p_food, p_phys, p_drink, p_unins, nrow = 2, ncol = 3, align = "v")
+
+tab_dis <- function(df, name) {
+  df %>%
+    summarise(
+      Variable = name,
+      Max = max(.data[[name]], na.rm = TRUE),
+      Min = min(.data[[name]], na.rm = TRUE),
+      Mean = mean(.data[[name]], na.rm = TRUE),
+      Median = median(.data[[name]], na.rm = TRUE),
+      Variance = var(.data[[name]], na.rm = TRUE),
+      Skewness = skewness(.data[[name]], na.rm = TRUE),
+      Kurtosis = kurtosis(.data[[name]], na.rm = TRUE)
+    )
+}
+
+t_smok <- tab_dis(cases_f, "Smoke")
+t_drink <- tab_dis(cases_f, "Drinking")
+t_obs <- tab_dis(cases_f, "Obesity")
+t_uni <- tab_dis(cases_f, "Uninsured")
+t_phs <- tab_dis(cases_f, "Physical inactivity")
+t_food <- tab_dis(cases_f, "Food Environment")
+
+bind_rows(t_smok, t_drink, t_obs, t_uni, t_phs, t_food) |> knitr::kable(digits = 3)
 ```
 
-Based on these metrics, we can make the following observations and inferences: Range:The maximum value is 0.403, and the minimum value is 0.071. 
-
-Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. 
-
-Dispersion: A small variance value (0.002) suggests that the data is relatively concentrated, with low dispersion. 
-
-Skewness: A positive skewness value (0.218) indicates a slight right-skewed distribution, implying a slight positive skew. 
-
-Kurtosis: A high kurtosis value (3.641) indicates a sharper peak in the distribution compared to a normal distribution. This aslo suggests a strong concentration of data around the mean. 
-
-#### Obesity rate
+For social-economic and demographic variables, all of them are right-skewed and most are characterized with fat tails, especially population, where there occurs to be a number of cities with large population. The dispersion in these statistics also lends power in clustering these counties based on these factors. For the variable rural and total death rates, the kurtosis is low, suggesting there is a lack of extreme values and a more uniform-like distribution.
 
 ```{r}
-ggplot(data = health_c, aes(x = Obesity)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of obesity rate", x = "Obesity rate", y = "Frequency")
-ggplot(data = health_c, aes(x =Obesity)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(Obesity,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(Obesity,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(Obesity, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(Obesity, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(Obesity,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -25) +
-  geom_text(aes(x = median(Obesity,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -24,hjust=-0.3) +
-  geom_text(aes(x = quantile(Obesity, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -1) +
-  geom_text(aes(x = quantile(Obesity, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -1)+
-  labs(title = "Density Curve", x = "Obesity rate",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(Obesity)),
-            max=max(Obesity,na.rm = TRUE),
-            min=min(Obesity,na.rm = TRUE),
-    mean = mean(Obesity,na.rm = TRUE),
-    median = median(Obesity,na.rm = TRUE),
-    variance = var(Obesity,na.rm = TRUE),
-    skewness = skewness(Obesity,na.rm = TRUE),
-    kurtosis = kurtosis(Obesity,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
+p_hom <- ggplot(data = cases_f, aes(x = `Homicide`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Homicide", y = "Frequency")
+
+p_rural <- ggplot(data = cases_f, aes(x = `Rural`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Rural", y = "Frequency")
+
+p_hedu <- ggplot(data = cases_f, aes(x = `Higher Education`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Higher education", y = "Frequency")
+
+p_pop <- ggplot(data = cases_f, aes(x = `Population`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Population", y = "Frequency") + 
+  theme( axis.text.x = element_text(angle = 45, hjust = 1), 
+         plot.title = element_text(margin = margin(b = 40))
+  )
+  
+p_td <- ggplot(data = cases_f, aes(x = `Total Deaths`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Total Deaths", y = "Frequency")
+
+p_pov <- ggplot(data = cases_f, aes(x = `Poverty`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "poverty", y = "Frequency")
+
+p_inc <- ggplot(data = cases_f, aes(x = `Median Income`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Median Income", y = "Frequency")
+
+p_unemp <- ggplot(data = cases_f, aes(x = `Unemployed`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Unemployed", y = "Frequency")
+
+p_18 <- ggplot(data = cases_f, aes(x = `Below 18`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Below 18", y = "Frequency")
+
+p_65 <- ggplot(data = cases_f, aes(x = `Above 65`)) +
+  geom_histogram(color = "black", bins = 50) +
+  labs(x = "Above 65", y = "Frequency")
+
+plot_grid(p_hom, p_rural, p_hedu, p_pop, p_td, p_pov, p_inc, p_unemp, p_18, p_65, NULL, NULL, nrow = 4, ncol = 3, align = "v")
+
+t_homi <- tab_dis(cases_f, "Homicide")
+t_rural <- tab_dis(cases_f, "Rural")
+t_hedu <- tab_dis(cases_f, "Higher Education")
+t_pop <- tab_dis(cases_f, "Population")
+t_tdeath <- tab_dis(cases_f, "Total Deaths")
+t_pov <- tab_dis(cases_f, "Poverty")
+t_inc <- tab_dis(cases_f, "Median Income")
+t_unemp <- tab_dis(cases_f, "Unemployed")
+t_18 <- tab_dis(cases_f, "Below 18")
+t_65 <- tab_dis(cases_f, "Above 65")
+
+bind_rows(t_homi, t_rural, t_hedu, t_pop, t_tdeath, t_pov, t_inc, t_unemp, t_18, t_65) |> knitr::kable(digits = 3)
 ```
-
-Range:The maximum value is 0.589, and the minimum value is 0.143. 
-
-Central Tendency: The mean and median are very close, indicating that the central position of the dataset is around these two values. 
-
-Dispersion: The relatively small variance value (0.004) suggests that the data is relatively concentrated, with low dispersion. 
-
-Skewness: The skewness is a negative value (-0.069), indicating a slight leftward skew in the distribution. This suggests that there are relatively more smaller values in the dataset compared to larger values. 
-
-Kurtosis: The kurtosis value (3.41) is relatively high, indicating a sharper peak in the distribution compared to a normal distribution. This could imply that there are more outliers in the tails of the distribution or that the data is more concentrated around the mean. 
-
-#### Food environment
-
-```{r}
-ggplot(data = health_c, aes(x = `Food Environment`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Food Environment", x = "Food Environment", y = "Frequency")
-ggplot(data = health_c, aes(x =`Food Environment`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Food Environment`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Food Environment`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Food Environment`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Food Environment`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Food Environment`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
-  geom_text(aes(x = median(`Food Environment`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
-  geom_text(aes(x = quantile(`Food Environment`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 5) +
-  geom_text(aes(x = quantile(`Food Environment`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 5)+
-  labs(title = "Density Curve", x = "Food Environment",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Food Environment`)),
-            max=max(`Food Environment`,na.rm = TRUE),
-            min=min(`Food Environment`,na.rm = TRUE),
-    mean = mean(`Food Environment`,na.rm = TRUE),
-    median = median(`Food Environment`,na.rm = TRUE),
-    variance = var(`Food Environment`,na.rm = TRUE),
-    skewness = skewness(`Food Environment`,na.rm = TRUE),
-    kurtosis = kurtosis(`Food Environment`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range of Distribution: The minimum value is 0, and the maximum is 10. 
-
-Central Tendency: The mean and median are close, indicating that the overall trend of the data centres around 7.446. 
-
-Dispersion: The relatively large variance (1.329) suggests a dispersed distribution. 
-
-Skewness: The negative skewness (-1.316) indicates a slight leftward skew, suggesting a relatively higher frequency of smaller values. 
-
-Kurtosis: The high kurtosis value (6.74) implies a sharper peak compared to a normal distribution. This indicates a heavier tail in the distribution with some extreme values. 
-
-#### Physical inactivity
-
-```{r}
-ggplot(data = health_c, aes(x = `Physical inactivity`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Physical inactivity", x = "Physical inactivity", y = "Frequency")
-ggplot(data = health_c, aes(x =`Physical inactivity`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Physical inactivity`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Physical inactivity`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Physical inactivity`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Physical inactivity`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Physical inactivity`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
-  geom_text(aes(x = median(`Physical inactivity`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -4,hjust=-0.3) +
-  geom_text(aes(x = quantile(`Physical inactivity`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -5) +
-  geom_text(aes(x = quantile(`Physical inactivity`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -5)+
-  labs(title = "Density Curve", x = "Physical inactivity",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Physical inactivity`)),
-            max=max(`Physical inactivity`,na.rm = TRUE),
-            min=min(`Physical inactivity`,na.rm = TRUE),
-    mean = mean(`Physical inactivity`,na.rm = TRUE),
-    median = median(`Physical inactivity`,na.rm = TRUE),
-    variance = var(`Physical inactivity`,na.rm = TRUE),
-    skewness = skewness(`Physical inactivity`,na.rm = TRUE),
-    kurtosis = kurtosis(`Physical inactivity`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range: The minimum value is 0.089, and the maximum is 0.504. 
-
-Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.266. 
-
-Dispersion: The variance is relatively small (0.003), suggesting a concentrated distribution,with low dispersion. 
-
-Skewness: The positive skewness (0.181) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. 
-
-Kurtosis: The kurtosis value (2.98) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. 
-
-#### Drinking rate
-
-```{r}
-ggplot(data = health_c, aes(x = `Drinking`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Drinking", x = "Drinking rate", y = "Frequency")
-ggplot(data = health_c, aes(x =`Drinking`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Drinking`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Drinking`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Drinking`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Drinking`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Drinking`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
-  geom_text(aes(x = median(`Drinking`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -4,hjust=-0.3) +
-  geom_text(aes(x = quantile(`Drinking`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -5) +
-  geom_text(aes(x = quantile(`Drinking`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -5)+
-  labs(title = "Density Curve", x = "Drinking rate",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Drinking`)),
-            max=max(`Drinking`,na.rm = TRUE),
-            min=min(`Drinking`,na.rm = TRUE),
-    mean = mean(`Drinking`,na.rm = TRUE),
-    median = median(`Drinking`,na.rm = TRUE),
-    variance = var(`Drinking`,na.rm = TRUE),
-    skewness = skewness(`Drinking`,na.rm = TRUE),
-    kurtosis = kurtosis(`Drinking`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range: The minimum value is 0.065, and the maximum is 0.0.31. 
-
-Central Tendency: The mean and median are close, indicating that the overall trend of the data centrers around 0.191. 
-
-Dispersion: The variance is relatively small (0.001), suggesting a concentrated distribution,with low dispersion. 
-
-Skewness: The positive skewness (0.192) indicates a slight rightward skew, suggesting a slightly higher frequency of larger values. 
-
-Kurtosis: The kurtosis value (2.77) implies a distribution peak that is sharper than a normal distribution. This may suggest a distribution with a moderate concentration around the mean. 
-
-#### Uninsured rate
-
-```{r}
-ggplot(data = health_c, aes(x = `Uninsured`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Uninsured", x = "Uninsured rate", y = "Frequency")
-ggplot(data = health_c, aes(x =`Uninsured`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Uninsured`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Uninsured`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Uninsured`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Uninsured`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Uninsured`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
-  geom_text(aes(x = median(`Uninsured`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -4,hjust=-0.3) +
-  geom_text(aes(x = quantile(`Uninsured`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -1) +
-  geom_text(aes(x = quantile(`Uninsured`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -1)+
-  labs(title = "Density Curve", x = "Uninsured rate",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Uninsured`)),
-            max=max(`Uninsured`,na.rm = TRUE),
-            min=min(`Uninsured`,na.rm = TRUE),
-    mean = mean(`Uninsured`,na.rm = TRUE),
-    median = median(`Uninsured`,na.rm = TRUE),
-    variance = var(`Uninsured`,na.rm = TRUE),
-    skewness = skewness(`Uninsured`,na.rm = TRUE),
-    kurtosis = kurtosis(`Uninsured`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range: The minimum value is 0.024, and the maximum is 0.322. 
-
-Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.115. 
-
-Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
-
-Skewness: The positive skewness indicates a rightward skew, suggesting a slightly higher frequency of larger values. 
-
-Kurtosis: The kurtosis value implies a distribution peak that is sharper than a normal distribution. This suggests a distribution with a concentration around the mean and heavier tails.
-
-
-#### Homicide
-
-```{r}
-ggplot(data = health_c, aes(x = `Homicide`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Homicide", x = "Homicide", y = "Frequency")
-ggplot(data = health_c, aes(x =`Homicide`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Homicide`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Homicide`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Homicide`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Homicide`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Homicide`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = 3) +
-  geom_text(aes(x = median(`Homicide`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = 4,hjust=0.3) +
-  geom_text(aes(x = quantile(`Homicide`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 15) +
-  geom_text(aes(x = quantile(`Homicide`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 15)+
-  labs(title = "Density Curve", x = "Homicide",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Homicide`)),
-            max=max(`Homicide`,na.rm = TRUE),
-            min=min(`Homicide`,na.rm = TRUE),
-    mean = mean(`Homicide`,na.rm = TRUE),
-    median = median(`Homicide`,na.rm = TRUE),
-    variance = var(`Homicide`,na.rm = TRUE),
-    skewness = skewness(`Homicide`,na.rm = TRUE),
-    kurtosis = kurtosis(`Homicide`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range: The data has a wide range, from 0.0603 to 41.47,potentially including some extreme values. 
-
-Central Tendency: The mean and median are relatively close, but considering the right-skewed distribution, the median may better represent the central tendency of the data. 
-
-Dispersion: The variance is large, indicating that the data is relatively dispersed, possibly due to the presence of extreme values. 
-
-Skewness: Positive skewness indicates a right-skewed distribution, suggesting the presence of some relatively large values. 
-
-Kurtosis: High kurtosis indicates a distribution with a sharper peak and heavier tails, possibly indicating the presence of extreme values. 
-
-#### Rural rate
-
-```{r}
-ggplot(data = health_c, aes(x = `Rural`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Rural", x = "Rural", y = "Frequency")
-ggplot(data = health_c, aes(x =`Rural`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Rural`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Rural`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Rural`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Rural`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Rural`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
-  geom_text(aes(x = median(`Rural`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
-  geom_text(aes(x = quantile(`Rural`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 5) +
-  geom_text(aes(x = quantile(`Rural`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 5)+
-  labs(title = "Density Curve", x = "Rural",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Rural`)),
-            max=max(`Rural`,na.rm = TRUE),
-            min=min(`Rural`,na.rm = TRUE),
-    mean = mean(`Rural`,na.rm = TRUE),
-    median = median(`Rural`,na.rm = TRUE),
-    variance = var(`Rural`,na.rm = TRUE),
-    skewness = skewness(`Rural`,na.rm = TRUE),
-    kurtosis = kurtosis(`Rural`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range: The data ranges from 0 to 1. 
-
-Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.58. 
-
-Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
-
-Skewness: Slight left-skewness suggests a tendency for smaller values. 
-
-Kurtosis: Moderate kurtosis indicates a distribution with a moderate peak and tails. 
-
-#### Below 18 rate
-
-```{r}
-ggplot(data = health_c, aes(x = `Below 18`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Below 18", x = "Below 18", y = "Frequency")
-ggplot(data = health_c, aes(x =`Below 18`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Below 18`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Below 18`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Below 18`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Below 18`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Below 18`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
-  geom_text(aes(x = median(`Below 18`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
-  geom_text(aes(x = quantile(`Below 18`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = -3) +
-  geom_text(aes(x = quantile(`Below 18`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = -3)+
-  labs(title = "Density Curve", x = "Below 18",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Below 18`)),
-            max=max(`Below 18`,na.rm = TRUE),
-            min=min(`Below 18`,na.rm = TRUE),
-    mean = mean(`Below 18`,na.rm = TRUE),
-    median = median(`Below 18`,na.rm = TRUE),
-    variance = var(`Below 18`,na.rm = TRUE),
-    skewness = skewness(`Below 18`,na.rm = TRUE),
-    kurtosis = kurtosis(`Below 18`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range: The data ranges from 0 to 0.417. 
-
-Central Tendency: The mean and median are relatively close, suggesting a symmetric or nearly symmetric distribution. 
-
-Dispersion: The extremely low variance indicates that the data points are very close to the mean. 
-
-Skewness: Positive skewness suggests a tendency for slightly larger values. 
-
-Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails. 
-
-#### Above 65 rate
-
-```{r}
-ggplot(data = health_c, aes(x = `Above 65`)) +
-  geom_histogram(color = "black",bins = 50) +
-  labs(title = "Distribution of Above 65", x = "Above 65", y = "Frequency")
-ggplot(data = health_c, aes(x =`Above 65`)) +
- geom_density()+
-  geom_vline(aes(xintercept = mean(`Above 65`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5)+
-  geom_vline(aes(xintercept = median(`Above 65`,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5,color="red") +
-  geom_vline(aes(xintercept = quantile(`Above 65`, 0.25,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_vline(aes(xintercept = quantile(`Above 65`, 0.75,na.rm = TRUE)), linetype = "dashed", linewidth = 0.5) +
-  geom_text(aes(x = mean(`Above 65`,na.rm = TRUE), y = 0.25, label = "Mean"), vjust = -5) +
-  geom_text(aes(x = median(`Above 65`,na.rm = TRUE), y = 0.25,label = "Median",color="red"), vjust = -5,hjust=-0.3) +
-  geom_text(aes(x = quantile(`Above 65`, 0.25,na.rm = TRUE), y = 0.25, label = "25%"),vjust = 5) +
-  geom_text(aes(x = quantile(`Above 65`, 0.75,na.rm = TRUE), y = 0.25, label = "75%"), vjust = 5)+
-  labs(title = "Density Curve", x = "Above 65",y="Density")
-health_c |>
-  summarise(missing_count=sum(is.na(`Above 65`)),
-            max=max(`Above 65`,na.rm = TRUE),
-            min=min(`Above 65`,na.rm = TRUE),
-    mean = mean(`Above 65`,na.rm = TRUE),
-    median = median(`Above 65`,na.rm = TRUE),
-    variance = var(`Above 65`,na.rm = TRUE),
-    skewness = skewness(`Above 65`,na.rm = TRUE),
-    kurtosis = kurtosis(`Above 65`,na.rm = TRUE)) |>
-  knitr::kable(digits = 3)
-```
-
-Range: The data ranges from 0.049 to 0.582. 
-
-Central Tendency: The mean and median are relatively close, indicating that the overall trend of the data centers around 0.197. 
-
-Dispersion: The variance is relatively small, suggesting a concentrated distribution,with low dispersion. 
-
-Skewness: Positive skewness suggests a tendency for slightly larger values. 
-
-Kurtosis: High kurtosis indicates a distribution with a high peak and heavy tails.
 
 ### Time series analysis of national cases and deaths.
 
-Next we aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from July 31, 2020, to June 30, 2021.
+Next we aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from June 31, 2020, to June 30, 2021.
 
-Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
+Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.Utilizing the ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 70% of the data is used as the training set, and the remaining 30% is utilized as the test set.
+
+$(1 - \sum_{i=1}^{p} \phi_{i} L^{i} ) \; (1-L)^{d} \; X_{t} = (1 + \sum_{i = 1}^{q} \theta_{i}L^{i}) \;\epsilon_{t}$
 
 #### National cases
 
 ```{r}
 national_cases <- cases |>
-  select(starts_with("202"))|>
-  summarise_all(sum, na.rm = TRUE)|>
-  select(`2020-07-31`:`2021-06-30`) |>
+  select(starts_with("202")) |>
+  summarise_all(sum, na.rm = TRUE) |>
+  select(`2020-07-01`:`2021-06-30`) |>
   pivot_longer(everything(), names_to = "Date", values_to = "Cases")
 ```
 
 ```{r}
-case_ts <- ts(national_cases$Cases)
-plot.ts(case_ts,main = "Original data", xlab = "Cases", ylab = "Time")
-plot.ts(diff(diff(case_ts)),main = "Second-order differenced data", ylab = "Second-order Differenced Cases", xlab = "Time")
-adf.test(diff(diff(case_ts)))
+case_ts <- log(ts(national_cases$Cases))
+par(mfrow = c(1, 2))
+p_orig <- plot.ts(case_ts, main = "Original data", xlab = "Time", ylab = "Cases")
+p_2diff <- plot.ts(diff(diff(case_ts)), main = "Second-order differenced data", ylab = "Second-order Differenced Cases", xlab = "Time")
+par(mfrow = c(1, 1))
+adf1 <- adf.test(diff(diff(case_ts)))
 ```
 
-The test statistic is -9.1682 with a lag order of 6, resulting in a p-value of 0.01.With a p-value less than the significance level (commonly 0.05),the alternative hypothesis of stationarity is supported for the second-order differenced series.
+By applying the ADF test on the second-order difference data, we find the test statistic is `r adf1$statistic` with a lag order of 6, resulting in a p-value of `r adf1$p.value`. We thus reject the null hypothesis (under the 5% significance level), and the stationarity is supported for the second-order differenced series.
+
+By minimizing AIC, the obtained ARIMA model is an ARIMA(4,2,2) with the estimated cofficients $\phi_{1} = 0.7446, \phi_{2} = -0.6193,$ $\phi_{3} = -0.0969, \phi_{4} = -0.2473, \theta_{1} = -1.0541 \; \text{and} \; \phi_{2} = 0.6374$. By inspecting the residuals, we find it tends to be a white noise, although the residuals do not seem to be normal. 
 
 ```{r}
-train_case <- case_ts[1:270]
-test_case <- case_ts[271:335] |>
-  ts(start = '271') 
-model_case <- auto.arima(train_case)
-checkresiduals(model_case)
-summary(model_case)
-plot(forecast(model_case,h=65))
-lines(test_case,lwd=2,col='red')
+cutoff_index <- floor(0.7 * length(case_ts))
+
+train_case <- case_ts[1:cutoff_index]
+test_case <- case_ts[cutoff_index : length(case_ts)] |> ts(start = as.character(cutoff_index + 1))
+model_case <- auto.arima(train_case, ic = "aic")
+checkresiduals(model_case, test = FALSE)
+plot(forecast(model_case, h = floor(0.3 * length(case_ts)) + 1) )
+lines(test_case, lwd = 2, col = "red") 
 ```
 
 #### National deaths
 
 ```{r}
 national_deaths <- deaths |>
-  select(starts_with("202"))|>
-  mutate(across(everything(), as.numeric))|>
-  summarise_all(sum, na.rm = TRUE)|>  
-  select(`2020-07-31`:`2021-06-30`) |>
+  select(starts_with("202")) |>
+  mutate(across(everything(), as.numeric)) |>
+  summarise_all(sum, na.rm = TRUE) |>
+  select(`2020-07-01`:`2021-06-30`) |>
   pivot_longer(everything(), names_to = "Date", values_to = "Deaths")
 ```
 
 ```{r}
 death_ts <- ts(national_deaths$Deaths)
+par(mfrow = c(1, 2))
 plot.ts(death_ts)
 plot.ts(diff(diff(death_ts)))
+par(mfrow = c(1, 1))
 ```
 
 ```{r}
-train_death <- death_ts[1:270]
-test_death <- death_ts[271:335] |>
-  ts(start = '271')
+train_death <- death_ts[1:cutoff_index]
+test_death <- death_ts[cutoff_index : length(death_ts)] |>
+  ts(start = as.character(cutoff_index + 1))
 ```
 
 ```{r}
 model_death <- auto.arima(train_death)
 checkresiduals(model_death)
 summary(model_death)
-plot(forecast(model_death,h=65))
-lines(test_death,lwd=2,col='red')
+plot(forecast(model_death, h = floor(0.3 * length(case_ts))+ 1))
+lines(test_death, lwd = 2, col = "red")
 ```
 
 #### Relationship between national cases and deaths
@@ -912,14 +590,14 @@ lines(test_death,lwd=2,col='red')
 Besides examining the correlation between cases and deaths themselves, we also aim to determine if there is a significant relationship between cases and deaths. We opted for linear regression in this case. The results of the linear regression indicate a significant linear correlation between deaths and cases, implying that the virus's fatality rate is maybe a constant value, around 1.53%.
 
 ```{r}
-national_data <- left_join(national_cases,national_deaths,'Date')
+national_data <- left_join(national_cases, national_deaths, "Date")
 ```
 
 ```{r}
 c_relation <- lm(national_data$Deaths ~ national_data$Cases)
-ggplot(national_data,aes(x = Cases, y = Deaths)) +
-  geom_point(color = "blue") + 
-  geom_abline(intercept = coef(c_relation)[1], slope = coef(c_relation)[2], color = "red") + 
+ggplot(national_data, aes(x = Cases, y = Deaths)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = coef(c_relation)[1], slope = coef(c_relation)[2], color = "red") +
   labs(x = "Cases", y = "Deats", title = "Linear Regression") +
   theme_minimal()
 summary(c_relation)
@@ -939,7 +617,7 @@ Having established the dataset's suitability for clustering analysis, the subseq
 
 ```{r, echo=FALSE}
 fviz_nbclust(df, kmeans, method = "wss") +
-  geom_vline(xintercept = 4, linetype = 2)+
+  geom_vline(xintercept = 4, linetype = 2) +
   labs(subtitle = "Elbow method")
 ```
 
@@ -947,8 +625,10 @@ We implement k-means clustering with a predetermined value of 4 for better under
 
 ```{r, echo=FALSE}
 km.res <- eclust(df, "kmeans", k = 4, nstart = 25, graph = FALSE)
-fviz_cluster(km.res, geom = "point", ellipse.type = "norm",
-             palette = "jco", ggtheme = theme_minimal())
+fviz_cluster(km.res,
+  geom = "point", ellipse.type = "norm",
+  palette = "jco", ggtheme = theme_minimal()
+)
 ```
 
 The dataset is partitioned into 4 clusters, with each containing `r km.res$size[1]`, `r km.res$size[2]`, `r km.res$size[3]`, and `r km.res$size[4]` data points. We can therefore characterize the social-economic profiles of these clusters by examining the distribution of the variables within each cluster. Cluster 3, in particular, has the highest rates of homicide, rural living, poverty and total death. It also has the smallest population, lowest higher education rate and median income. It is then labeled as "Small rural towns with more poverty and less education". In contrast, cluster 4 shows best results among the social-economic factors with highest higher education, median income, but least rates of homicide, rural living, total deaths and poverty. We thus gives it the label "Big cities with more wealth and education". Clusters 1 and 2 fall between Clusters 3 and 4 in various indicators. Cluster 2 outperforms Cluster 1 in higher education rate, lower total death rates, higher median income, and less poverty, despite a slightly higher homicide rate. We notice that the indicators for cluster 2 are similar to the national level, but with less homicide and being less rural. We provide it with the label "Medium-sized cities averaging to national level". Finally, cluster 1 has education, population, poverty, and median income below national averages, along with a more rural profile and a higher percentage of elderly population (and less children/teenager percentage). Therefore, it is labeled as "rural areas with higher elder population". We do not leverage unemployment as a discriminitive factor as it converges around the national level rate across all clusters, even though it tends to be higher in bigger cities.
@@ -956,15 +636,15 @@ The dataset is partitioned into 4 clusters, with each containing `r km.res$size[
 ```{r, echo=FALSE}
 cases_f$Cluster <- km.res$cluster
 cases_f$death_rate <- deaths_f$`2021-06` / cases_f$`2021-06`
-cl1 <- cases_f[cases_f$Cluster == 1,]
-cl2 <- cases_f[cases_f$Cluster == 2,]
-cl3 <- cases_f[cases_f$Cluster == 3,]
-cl4 <- cases_f[cases_f$Cluster == 4,]
+cl1 <- cases_f[cases_f$Cluster == 1, ]
+cl2 <- cases_f[cases_f$Cluster == 2, ]
+cl3 <- cases_f[cases_f$Cluster == 3, ]
+cl4 <- cases_f[cases_f$Cluster == 4, ]
 clusters <- list(cl1, cl2, cl3, cl4)
 
-tab <- matrix(data=NA, nrow=11, ncol=6)
-tab[1,] <- c('', 'Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4', 'National')
-tab[,1] <- c("", "Homicide", "Rural", "Higher Education", "Population", "Total Deaths", "Poverty", "Median Income", "Unemployed", "Below 18", "Above 65")
+tab <- matrix(data = NA, nrow = 11, ncol = 6)
+tab[1, ] <- c("", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "National")
+tab[, 1] <- c("", "Homicide", "Rural", "Higher Education", "Population", "Total Deaths", "Poverty", "Median Income", "Unemployed", "Below 18", "Above 65")
 
 for (i in 1:5) {
   if (i %in% c(1, 2, 3, 4)) {
@@ -972,17 +652,17 @@ for (i in 1:5) {
   } else {
     cluster <- cases_f
   }
-  
-  tab[2, 1+i] <- round(mean(cluster$Homicide), 4)
-  tab[3, 1+i] <- round(mean(cluster$Rural), 4)
-  tab[4, 1+i] <- round(mean(cluster$`Higher Education`), 4)
-  tab[5, 1+i] <- round(mean(cluster$Population))
-  tab[6, 1+i] <- round(mean(cluster$`Total Deaths`), 4)
-  tab[7, 1+i] <- round(mean(cluster$Poverty), 4)
-  tab[8, 1+i] <- round(mean(cluster$`Median Income`), 4)
-  tab[9, 1+i] <- round(mean(cluster$Unemployed), 4)
-  tab[10, 1+i] <- round(mean(cluster$`Below 18`), 4)
-  tab[11, 1+i] <- round(mean(cluster$`Above 65`), 4)
+
+  tab[2, 1 + i] <- round(mean(cluster$Homicide), 4)
+  tab[3, 1 + i] <- round(mean(cluster$Rural), 4)
+  tab[4, 1 + i] <- round(mean(cluster$`Higher Education`), 4)
+  tab[5, 1 + i] <- round(mean(cluster$Population))
+  tab[6, 1 + i] <- round(mean(cluster$`Total Deaths`), 4)
+  tab[7, 1 + i] <- round(mean(cluster$Poverty), 4)
+  tab[8, 1 + i] <- round(mean(cluster$`Median Income`), 4)
+  tab[9, 1 + i] <- round(mean(cluster$Unemployed), 4)
+  tab[10, 1 + i] <- round(mean(cluster$`Below 18`), 4)
+  tab[11, 1 + i] <- round(mean(cluster$`Above 65`), 4)
 }
 
 knitr::kable(tab)
@@ -1009,35 +689,40 @@ colnames(cl4) <- make.names(colnames(cl4))
 ctrl <- trainControl(method = "cv", number = 5)
 grid <- expand.grid(cp = seq(0, 0.04, by = 0.002))
 
-tree1 <- train(death_rate ~ ., 
-               data = cl1,      
-               method = "rpart",             
-               trControl = ctrl,            
-               tuneGrid = grid)
+tree1 <- train(death_rate ~ .,
+  data = cl1,
+  method = "rpart",
+  trControl = ctrl,
+  tuneGrid = grid
+)
 
-tree2 <- train(death_rate ~ ., 
-               data = cl2,      
-               method = "rpart",             
-               trControl = ctrl,            
-               tuneGrid = grid)
+tree2 <- train(death_rate ~ .,
+  data = cl2,
+  method = "rpart",
+  trControl = ctrl,
+  tuneGrid = grid
+)
 
-tree3 <- train(death_rate ~ ., 
-               data = cl3,      
-               method = "rpart",             
-               trControl = ctrl,            
-               tuneGrid = grid)
+tree3 <- train(death_rate ~ .,
+  data = cl3,
+  method = "rpart",
+  trControl = ctrl,
+  tuneGrid = grid
+)
 
-tree4 <- train(death_rate ~ ., 
-               data = cl4,      
-               method = "rpart",             
-               trControl = ctrl,            
-               tuneGrid = grid)
+tree4 <- train(death_rate ~ .,
+  data = cl4,
+  method = "rpart",
+  trControl = ctrl,
+  tuneGrid = grid
+)
 
-tree <- train(death_rate ~ ., 
-               data = all,      
-               method = "rpart",             
-               trControl = ctrl,            
-               tuneGrid = grid)
+tree <- train(death_rate ~ .,
+  data = all,
+  method = "rpart",
+  trControl = ctrl,
+  tuneGrid = grid
+)
 ```
 
 After obtaining the four clusters, we are able to analyse the relevant health factors (namely, smoke, obesity, food environment, physical inactivity, drinking and uninsurance rate) that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees with the classification and regression trees (CART) algorithm. The generated trees offer an easily interpretable framework for discerning a county's death rate. Starting from the root node that contains all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter such that a good balance between model simplicity and generality can be ensured. This is done by 5-fold cross validation with grid search on the hyper-parameter and in doing so we choose the one with least resulting RSME.
@@ -1053,16 +738,19 @@ rpart.plot(tree3$finalModel, main = "Regression tree for Cluster 3 -- Small rura
 rpart.plot(tree4$finalModel, main = "Regression tree for Cluster 4 -- Big cities with more wealth and education")
 rpart.plot(tree$finalModel, main = "Regreesion tree for national data")
 ```
+
 The trees also provide metrics to measure the importance of the variables in its construction. It is calculated by the improvement in the purity that each variable contributes, which, as a result, may be different from the order in which they appear in the tree. Below are the figures of the (scaled) variable importance for the full data and each cluster. As can be seen, for most clusters, the primarily important variable is physical inactivity, followed by uninsuarnce and food and environment. However, for the rural areas with more poverty and less education, the most influential factor becomes uninsurane, and other important factors turn to be smoking, drinking, etc. Conversely, in big cities with more wealth and education, obesity takes the second place in the measurment of variable importance. It is, however, interesting to notice that uninsuarce is ranked not so important on a national level, which could be imputed to the instability of individual trees.
 
 ```{r, echo = FALSE}
-varImp_plot <- function (tree){
+varImp_plot <- function(tree) {
   df <- data.frame(Importance = tree$finalModel$variable.importance)
   df <- df / max(df)
-  df |> rownames_to_column() |> 
+  df |>
+    rownames_to_column() |>
     rename("Variable" = rowname) |>
-    mutate(Variable = forcats::fct_inorder(Variable)) |> 
-    ggplot(aes(y = Variable, x = Importance)) + geom_col()
+    mutate(Variable = forcats::fct_inorder(Variable)) |>
+    ggplot(aes(y = Variable, x = Importance)) +
+    geom_col()
 }
 plot <- varImp_plot(tree)
 plot1 <- varImp_plot(tree1)
@@ -1074,6 +762,10 @@ plot_grid(plot, NULL, plot1, plot2, plot3, plot4, nrow = 3, ncol = 2, align = "v
 ```
 
 ## Conclusion
+
+This report investigates into the COVID-19 infection and deaths across the counties in US from June 2020 and July. We refer to the two-stage methodology as outlined in de Ona (2016). First, we cluster the counties using K-means clustering based on the their social economic profile, from which we are able to identify four distinct clusters. Then we build regression trees for each of the clusters to study the relationship between the death rate and health-related factors, which enables us to better target specific regions to reduce the COVID caused deaths. The findings mostly agree on that physical inactivity being the foremost important factors in COVID caused deaths. The exception is the rural areas with high poverty and low education, where uninsuarance becomes the most important and drinking and smoking also are deemed important. This finding could be used for policy makers to better
+
+Given the amount of missing values in the data and not considering the entries with these missing values, our analysis is conducted on the basis of `r nrow(cases_f)` counties out of `r nrow(cases)`. We must acknowledge that there could exist undiscovered patterns if we had access to those values and this also has some effect on the regression tree analysis. Secondly, we determine the number of clusters simply by elbow rule, which . Thirdly, we also have to point that the trees are not a stable method -- a small variation in the data could result in a different tree. Ensemble and boosting methods, such as random forests and gradient boosted trees, could be utilized to enhance the accuracy and stability but at the cost of the loss of easy interpretability of trees.
 
 ## References
 
