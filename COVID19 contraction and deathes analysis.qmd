@@ -548,11 +548,12 @@ adf1 <- adf.test(diff(diff(case_ts)))
 
 By applying the ADF test on the second-order difference data, we find the test statistic is `r adf1$statistic` with a lag order of 6, resulting in a p-value of `r adf1$p.value`. We thus reject the null hypothesis (under the 5% significance level), and the stationarity is supported for the second-order differenced series.
 
-By minimizing AIC, the obtained ARIMA model is an ARIMA(4,2,2) with the estimated cofficients $\phi_{1} = 0.7446, \phi_{2} = -0.6193,$ $\phi_{3} = -0.0969, \phi_{4} = -0.2473, \theta_{1} = -1.0541 \; \text{and} \; \phi_{2} = 0.6374$. By inspecting the residuals, we find it tends to be a white noise, although the residuals do not seem to be normal.
+By minimizing AIC, the obtained ARIMA model is an ARIMA(2,2,4) with the estimated cofficients $\phi_{1} = 0.7446, \phi_{2} = -0.6193,$ $\phi_{3} = -0.0969, \phi_{4} = -0.2473, \theta_{1} = -1.0541 \; \text{and} \; \phi_{2} = 0.6374$. By inspecting the residuals, we find it tends to be a white noise, although the residuals do not seem to be normal.
+
+We then use the fitted model to predict the number of cases and compare it with the test set. As shown in the figure below, the blue line is the model prediction curve, the red line is the curve of the test set, and the shaded area is the confidence interval. The model prediction curve is not much different from the curve of the test set, and both are within the confidence interval.
 
 ```{r}
 cutoff_index <- floor(0.7 * length(case_ts))
-
 train_case <- case_ts[1:cutoff_index]
 test_case <- case_ts[cutoff_index : length(case_ts)] |> ts(start = as.character(cutoff_index + 1))
 model_case <- auto.arima(train_case, ic = "aic")
@@ -562,6 +563,8 @@ lines(test_case, lwd = 2, col = "red")
 ```
 
 ##### National deaths
+
+Next, we perform a similar analysis on national deaths data. From the results, we can see that the death data becomes stable after second-order difference. By minimizing AIC, we obtain  an ARIMA(5,2,2). The model prediction curve (blue line) and the test set curve (red line) are within the confidence interval, which means that we have reason to believe that this model reflects the information of the data to a certain extent. 
 
 ```{r}
 national_deaths <- deaths |>
@@ -573,23 +576,24 @@ national_deaths <- deaths |>
 ```
 
 ```{r}
-death_ts <- ts(national_deaths$Deaths)
+death_ts <- log(ts(national_deaths$Deaths))
 par(mfrow = c(1, 2))
-plot.ts(death_ts)
-plot.ts(diff(diff(death_ts)))
+p_orig_d <-plot.ts(death_ts, main = "Original data", xlab = "Time", ylab = "Deaths")
+p_2diff_d <- plot.ts(diff(diff(death_ts)), main = "Second-order differenced data", ylab = "Second-order Differenced Deaths", xlab = "Time")
 par(mfrow = c(1, 1))
+adf2 <- adf.test(diff(diff(case_ts)))
 ```
 
 ```{r}
+cutoff_index <- floor(0.7 * length(death_ts))
 train_death <- death_ts[1:cutoff_index]
 test_death <- death_ts[cutoff_index : length(death_ts)] |>
   ts(start = as.character(cutoff_index + 1))
 ```
 
 ```{r}
-model_death <- auto.arima(train_death)
-checkresiduals(model_death)
-summary(model_death)
+model_death <- auto.arima(train_death, ic = "aic")
+checkresiduals(model_death, test = FALSE)
 plot(forecast(model_death, h = floor(0.3 * length(case_ts))+ 1))
 lines(test_death, lwd = 2, col = "red")
 ```
@@ -771,9 +775,6 @@ plot_grid(plot, NULL, plot1, plot2, plot3, plot4, nrow = 3, ncol = 2, align = "v
 ```
 
 ## Conclusion
-
-
-
 This report investigates into the COVID-19 infection and deaths across the counties in US from June 2020 and July. We refer to the two-stage methodology as outlined in de Ona (2016). First, we cluster the counties using K-means clustering based on the their social economic profile, from which we are able to identify four distinct clusters. Then we build regression trees for each of the clusters to study the relationship between the death rate and health-related factors, which enables us to better target specific regions to reduce the COVID caused deaths. The findings mostly agree on that physical inactivity being the foremost important factors in COVID caused deaths. The exception is the rural areas with high poverty and low education, where uninsuarance becomes the most important and drinking and smoking also are deemed important. This finding could be used for policy makers to better
 
 Given the amount of missing values in the data and not considering the entries with these missing values, our analysis is conducted on the basis of `r nrow(cases_f)` counties out of `r nrow(cases)`. We must acknowledge that there could exist undiscovered patterns if we had access to those values and this also has some effect on the regression tree analysis. Secondly, we determine the number of clusters simply by elbow rule, which . Thirdly, we also have to point that the trees are not a stable method -- a small variation in the data could result in a different tree. Ensemble and boosting methods, such as random forests and gradient boosted trees, could be utilized to enhance the accuracy and stability but at the cost of the loss of easy interpretability of trees.
