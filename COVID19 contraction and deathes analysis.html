@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yuntong Wu &amp; Jiaxin Shen">
+
+<title>COVID-19 cases and deaths analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="COVID19 contraction and deathes analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="COVID19 contraction and deathes analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="COVID19 contraction and deathes analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="COVID19 contraction and deathes analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="COVID19 contraction and deathes analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="COVID19 contraction and deathes analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="COVID19 contraction and deathes analysis_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="COVID19 contraction and deathes analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="COVID19 contraction and deathes analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="COVID19 contraction and deathes analysis_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="COVID19 contraction and deathes analysis.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">COVID-19 cases and deaths analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Yuntong Wu &amp; Jiaxin Shen </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="research-question" class="level2">
+<h2 class="anchored" data-anchor-id="research-question">Research question</h2>
+<p>The COVID-19 crisis has wreaked havoc on the world economy and people’s lives. In the US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died as of mid-July, 2023, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021—a period marked by the peak severity of the pandemic and the coexistence of various policies. With the project, we aim to gain an understanding of how different factors played a role during the pandemic.</p>
+<p>First, our focus revolves around understanding the dynamics of the pandemic’s progression within the US. It is crucial to delve into the data and find out whether there are tangible variations in the trends at some critical moments. For instance, we want to see if there is a dramatic difference in the confirmed cases or deaths in different regions and how these numbers evolve as time goes by.</p>
+<p>Furthermore, recognizing that the counties are different in various manners, our analysis seeks to uncover patterns of COVID cases and deaths that may be influenced by these differences. Our investigation extends to labeling the counties using the available characteristics. This could be done by using clustering techniques, such that counties with similar characteristics could be categorized into a group and others with disparate characteristics could be categorized into separate groups. By targeting specific cluster groups, policy makers are able to make better informed decisions to contain the spread of the virus or reduce the death rates.</p>
+<p>Lastly, this project also incorporates a nationwide exploration of the covariates that contribute to severity of deaths caused by COVID. We consider a pool of health-related factors, including smoking, drinking, obesity, food and environment, and insurance coverage to study their effects. Our chosen methodology involves utilizing regression trees to unravel the inter-relationship with the tree structure for each cluster. This approach also provides a measure of the importance for the factors in COVID caused deaths.</p>
+</section>
+<section id="data-sets-descriptions" class="level2">
+<h2 class="anchored" data-anchor-id="data-sets-descriptions">Data sets descriptions</h2>
+<p>To ensure the reliability of our findings, our initial step involves selecting the necessary data for accurate and comprehensive information. The most important information we is the daily cumulative number of cases and deaths across the counties, which are the target variables of our interest. Additionally, health, demographic and social-economic data are also necessary for us to discern their relationship with the COVID deaths rates. For example, people from poor regions may not have support from health insurance, which could become a serious problem if he catches the virus and his condition deteriorates. Given that most of the chosen datasets are very large and contains information not practical for our case study, we focus exclusively on a handful of variables that are directly relevant to our research objectives. Some downloaded files are .xsl and converted .csv. Below are the descriptions of the data sources and variables.</p>
+<section id="data-sources" class="level3">
+<h3 class="anchored" data-anchor-id="data-sources">Data sources</h3>
+<p>1.Health data: The file analytic_data2021 comes from the County Health Rankings &amp; Roadmaps (CHR&amp;R). County Health Rankings &amp; Roadmaps (CHR&amp;R) is a program of the University of Wisconsin Population Health Institute. The CHR&amp;R program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support leaders in growing community power to improve health equity.</p>
+<p>This file provides various health-related indicators for U.S. counties in 2021, including health behaviors, clinical care, as well as social and economic factors. Our focus is on ten specific variables—Adult smoking, Adult obesity, Food environment index, Physical inactivity, Excessive drinking, Uninsured, Percentage of people below 18 or above 65, rural rates, and homicide. We aim to investigate the correlation between these health metrics and COVID-19 death rates, seeking insights into the interplay between various factors and the pandemic’s impact on communities.</p>
+<p>2.COVID data: The files covid_confirmed_usafacts and covid_deaths_usafacts come from USAFacts. USAFacts currently counts presumptive positive cases as confirmed cases, as this is in line with how the CDC reports data. For deaths, USAFacts only takes those from state and local agencies if the virus played a direct role in causing death.</p>
+<p>These two files provide daily cumulative data on confirmed cases and deaths attributed to the pandemic, organized by county in the United States spanning from January 2020 to July 2023. Notably, there are some cases counted at the state level are not allocated to counties due to lack of information. We select the number at the end of each month as monthly data to make it more intuitive and representative. The COVID confirmed cases number and COVID death number are the target variables of our analysis.</p>
+<p>3.Social-economic and demographic data: These four files Education, PopulationEstimates, PovertyEstimates and Unemployment, come from USDA’s &amp; Economic Research Service, which anticipate trends and emerging issues in agriculture, food, the environment, and rural America and to conduct high-quality, objective economic research to inform and enhance public and private decision making.</p>
+<p>The Education dataset comes from multiple programs, including US Census Bureau and American Community Service. This file provides the basic information on the educational attainment of counties in the United States from 2017 to 2021. We focus on the variable, number of people having bachelor’s degree or above, in this dataset.</p>
+<p>PopulationEstimates are from U.S. Census Bureau for 1990, 2000, 2010, and 2020 Censuses of Population, and Population Estimates Program (PEP). We select population and total number of deaths for analysis.</p>
+<p>PovertyEstimates are model-based estimates from the U.S. Census Bureau’s Small Area Income and Poverty Estimate (SAIPE) program. For counties and states, the program models income and poverty estimates by combining survey data with population estimates and administrative records. The data file file includes the estimated statistics of counties in the United States in 2021. The number of people of all ages in poverty 2021 and median income are selected for analysis.</p>
+<p>The county and State unemployment rates are from the Bureau of Labor Statistics (BLS) Local Area Unemployment Statistics (LAUS) program. The Local Area Unemployment Statistics (LAUS) program is a federal-state cooperative effort in which monthly estimates of total employment and unemployment are prepared for over 7,600 areas. This file includes overall employment status by county in the United States from 2000 to 2022. Median household is from the U.S. Census Bureau’s Small Area Income and Poverty Estimate (SAIPE) program as in the previous dataset. The number of unemployed for each county is selected for this study.</p>
+</section>
+<section id="basic-information-about-the-data-files" class="level3">
+<h3 class="anchored" data-anchor-id="basic-information-about-the-data-files">Basic information about the data files</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 21%">
+<col style="width: 36%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">file</th>
+<th style="text-align: right;">row_number</th>
+<th style="text-align: right;">col_number</th>
+<th style="text-align: right;">missing_number</th>
+<th style="text-align: right;">rows_with_missing_values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">health</td>
+<td style="text-align: right;">3195</td>
+<td style="text-align: right;">690</td>
+<td style="text-align: right;">1026776</td>
+<td style="text-align: right;">3194</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cases</td>
+<td style="text-align: right;">3193</td>
+<td style="text-align: right;">1269</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">deaths</td>
+<td style="text-align: right;">3193</td>
+<td style="text-align: right;">1269</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">edu</td>
+<td style="text-align: right;">3285</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">1587</td>
+<td style="text-align: right;">163</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pop</td>
+<td style="text-align: right;">3283</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: right;">4011</td>
+<td style="text-align: right;">155</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pov</td>
+<td style="text-align: right;">3195</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">19105</td>
+<td style="text-align: right;">3195</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ump</td>
+<td style="text-align: right;">3277</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">1236</td>
+<td style="text-align: right;">149</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="description-of-variables" class="level3">
+<h3 class="anchored" data-anchor-id="description-of-variables">Description of variables</h3>
+<p>Below is the description of variables that are used in the project. For other variables, we refer interested readers to the data sources.</p>
+<p>countyFIPS: Federal Information Processing Standard (FIPS) Code.</p>
+<p>State: State abbreviation.</p>
+<p>County Name: county names.</p>
+<p>cases_mon: containing cumulative COVID-19 confirmed cases number at the end of each month from July 2020 to June 2021.</p>
+<p>deaths_mon: containing cumulative COVID-19 death number at the end of each month from July 2020 to June 2021.</p>
+<p>Smoking: Percentage of adults who are current smokers (age-adjusted).</p>
+<p>Obesity: Percentage of the adult population (age 20 and older) that reports a body mass index (BMI) greater than or equal to 30 kg/m2.</p>
+<p>Food environment index: Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).</p>
+<p>Physical inactivity: Percentage of adults age 20 and over reporting no leisure-time physical activity.</p>
+<p>Drinking: Percentage of adults reporting binge or heavy drinking (age-adjusted).</p>
+<p>Uninsured: Percentage of population under age 65 without health insurance.</p>
+<p>Homicide: Number of deaths due to homicide per 100,000 population.</p>
+<p>Rural: Percentage of population living in a rural area.</p>
+<p>Below 18: Percentage of population below 18 years of age.</p>
+<p>Above 65: Percentage of population ages 65 and older.</p>
+<p>Poverty: Percentage of estimated number of people of all ages in poverty 2021.</p>
+<p>Unemployed: Percentage of unemployment in 2021.</p>
+<p>Population: 4/1/2020 resident Census 2020 population.</p>
+<p>Median Income: Estimate of median household income in 2021.</p>
+<p>Total Deaths: Percentage of death number in period 7/1/2020 to 6/30/2021.</p>
+<p>Higher Education: Percentage of adults with a bachelor’s degree or higher, 2017-21.</p>
+</section>
+</section>
+<section id="data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="data-analysis">Data analysis</h2>
+<p>After obtaining the data, we analyze them from several aspects. Firstly, we present the overall graphical representations of the data, qualitatively discussing the trends (in months) in the COVID infection cases and deaths from a state level. Secondly, we conduct time series analysis on the national total cases and deaths, examining whether there are temporal correlations. We then fit an ARIMA model to quantitatively analyze the trend of data over time. Subsequently, we employ the K-means clustering analysis method to cluster different countries based on social-economic and demographic factors. Finally, we use the regression tree method to analyse the impact of health-related variables on the death rate.</p>
+<p>The visual representations below shows a persistent increase in the overall count of COVID-19 infection cases and associated deaths, characterized by an S-shaped curve. Notably, these two numbers are marked by a slow and steady increase in the period from July 2020 and October 2020. During the winter months (November 2020 to January 2021), a dramatic surge is evident across all states, contributing to a substantial spike in both new cases and deaths. In subsequent months (Feburary 2021 to June 2021), the new cases and deaths slow down to the initial level. Nevertheless, there appears to be a small peak in March and April 2021, when the delta variant becomes prevalent in the states.</p>
+<p>Geographically, the distribution of cases and deaths is more pronounced in densely populated, urbanized and prosperous regions, such as California, New York state, and Texas, while relatively fewer incidents are observed in rural and sparsely populated areas. The spatial imbalance motivates our exploration into the relationships between COVID-19 cases and deaths and various contributing factors by segmenting the different regions to better understand the dynamics on stage.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="time-series-analysis-of-national-cases-and-deaths" class="level3">
+<h3 class="anchored" data-anchor-id="time-series-analysis-of-national-cases-and-deaths">Time series analysis of national cases and deaths</h3>
+<p>Our focus now shifts to discerning specific trends in cases and deaths at the national level within the United States. For this, we examine daily cumulative data spanning from July 1, 2020, to June 30, 2021. We use the ARIMA model handle trend and seasonality and the resulting series is treated as stationary time series. The model is constructed with a combination of its lagged time series values (“AR”) and moving average of lagged forecast errors (“MA”). An ARIMA model is typically specified by a tuple (p, d, q), where p and q define the orders of AR and MA, and d specifies the order of differencing operation, in the form of <span class="math inline">\((1 - \sum_{i=1}^{p} \phi_{i} L^{i} ) \; (1-L)^{d} \; X_{t} = (1 + \sum_{i = 1}^{q} \theta_{i}L^{i}) \;\epsilon_{t}\)</span>.</p>
+<p>The advantage of the ARIMA model is that the model is simple and only requires endogenous variables without the help of other exogenous variables. Nevertheless, ARIMA model also has disadvantages: the time series data is required to be stable, or be stable after differentiation. Essentially it can only capture linear relationships, not non-linear relationships. In order to test the accuracy of model fitting, we divide the data set into a training set and a test set. The initial 70% of the data (1-Jul-2020 - 11-Mar-2021) is used as the training set and the remaining 30% (12-Mar-2021 - 30-June-2021) is utilized as the test set.</p>
+<section id="national-cases" class="level4">
+<h4 class="anchored" data-anchor-id="national-cases">National cases</h4>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>With an visual insepction, we find that the original data (after taking logarithm) is not stationary.The stability is achieved after second-order difference. By applying the ADF test on the second-order difference data, we find the test statistic is -6.7535216 with a lag order of 6, resulting in a p-value of 0.01. We thus reject the null hypothesis (under the 5% significance level), and the stationarity is supported for the second-order differenced series.</p>
+<p>By minimizing AIC, the obtained ARIMA model is an ARIMA(2,2,2) with the estimated cofficients <span class="math inline">\(\phi_{1} = 1.1897, \phi_{2} = -0.7419, \theta_{1} = -1.4758 \; \text{and} \; \phi_{2} = 0.7469\)</span>. After inspecting the residuals, we find it tends to be a white noise, as there are few cases of significant autocorrelation despite its distribution slightly deviates from normal.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-19-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In the subsequent analysis, we assess the forecasting accuracy of the model in the period from the remaining 30% of the data. The actual data curve in red and fitted curve in blue, along with 80% and 95% confidence intervals are represented. The high predictability is also validated by the value of mean absolute percentage error of 0.0983973%, suggesting a high level of accuracy.</p>
+</section>
+<section id="national-deaths" class="level4">
+<h4 class="anchored" data-anchor-id="national-deaths">National deaths</h4>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-23-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>By performing similar analysis on the death numbers, we obtain an ARIMA(5,2,2) with estimated coefficients <span class="math inline">\(\phi_{1} = 0.3002, \phi_{2} = -0.5749, \phi_{5} = -0.3117, \phi_{4} = -0.2904, \phi_{5} = -0.3423, \theta_{1} = -0.9409, \theta_{2} = 0.5743\)</span>. Following the previous analysis, the residuals of the model also tend to be white noise. The MAPE for the model is 22.8784705%, indicating a moderate level of accuracy since the model tends to overestimate the number of deaths.</p>
+</section>
+</section>
+<section id="an-inspection-on-covariates" class="level3">
+<h3 class="anchored" data-anchor-id="an-inspection-on-covariates">An inspection on covariates</h3>
+<p>We now leverage national county-level data to explicate the distribution characteristics of the factors associated with each county. In the context of health-related factors, certain variables exhibit normality, for example, smoking, drinking, obesity, and uninsurance, with skewness values proximate to 0 and kurtosis close to 3. In addition, physical inactivity is characterized by unskewness and thinner tails, suggesting low probabilities for cases of extrem low or high inactivity rates. The food environment index, in contrast, is more left-skewed and fatter tailed. This implies that quite a few counties have relatively unhealthy food environment.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Max</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Median</th>
+<th style="text-align: right;">Variance</th>
+<th style="text-align: right;">Skewness</th>
+<th style="text-align: right;">Kurtosis</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Smoking</td>
+<td style="text-align: right;">0.403</td>
+<td style="text-align: right;">0.071</td>
+<td style="text-align: right;">0.208</td>
+<td style="text-align: right;">0.210</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: right;">3.070</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Drinking</td>
+<td style="text-align: right;">0.310</td>
+<td style="text-align: right;">0.065</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.181</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.302</td>
+<td style="text-align: right;">3.281</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Obesity</td>
+<td style="text-align: right;">0.589</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: right;">0.340</td>
+<td style="text-align: right;">0.342</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: right;">-0.069</td>
+<td style="text-align: right;">3.410</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Uninsured</td>
+<td style="text-align: right;">0.321</td>
+<td style="text-align: right;">0.024</td>
+<td style="text-align: right;">0.115</td>
+<td style="text-align: right;">0.111</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.662</td>
+<td style="text-align: right;">3.269</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Physical Inactivity</td>
+<td style="text-align: right;">0.454</td>
+<td style="text-align: right;">0.089</td>
+<td style="text-align: right;">0.268</td>
+<td style="text-align: right;">0.265</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: right;">-0.002</td>
+<td style="text-align: right;">2.577</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Food Environment</td>
+<td style="text-align: right;">10.000</td>
+<td style="text-align: right;">2.100</td>
+<td style="text-align: right;">7.420</td>
+<td style="text-align: right;">7.500</td>
+<td style="text-align: right;">1.063</td>
+<td style="text-align: right;">-0.908</td>
+<td style="text-align: right;">5.522</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>For social-economic and demographic variables, all of them are right-skewed and most are characterized with fat tails, especially population, where there occurs to be a number of cities with large population. For the variable rural and total death rates, the kurtosis is low, suggesting there is a lack of extreme values and a more uniform-like distribution.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 14%">
+<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 9%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Max</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Median</th>
+<th style="text-align: right;">Variance</th>
+<th style="text-align: right;">Skewness</th>
+<th style="text-align: right;">Kurtosis</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Homicide</td>
+<td style="text-align: right;">41.470</td>
+<td style="text-align: right;">0.603</td>
+<td style="text-align: right;">6.696</td>
+<td style="text-align: right;">5.252</td>
+<td style="text-align: right;">2.894500e+01</td>
+<td style="text-align: right;">2.523</td>
+<td style="text-align: right;">12.381</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Rural</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.386</td>
+<td style="text-align: right;">0.353</td>
+<td style="text-align: right;">7.100000e-02</td>
+<td style="text-align: right;">0.368</td>
+<td style="text-align: right;">2.119</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Higher Education</td>
+<td style="text-align: right;">0.555</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: right;">0.175</td>
+<td style="text-align: right;">0.157</td>
+<td style="text-align: right;">6.000000e-03</td>
+<td style="text-align: right;">1.062</td>
+<td style="text-align: right;">4.079</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Population</td>
+<td style="text-align: right;">10014009.000</td>
+<td style="text-align: right;">5240.000</td>
+<td style="text-align: right;">227283.353</td>
+<td style="text-align: right;">83658.000</td>
+<td style="text-align: right;">2.477919e+11</td>
+<td style="text-align: right;">9.156</td>
+<td style="text-align: right;">139.636</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Total Deaths</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.000000e+00</td>
+<td style="text-align: right;">0.146</td>
+<td style="text-align: right;">2.404</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Poverty</td>
+<td style="text-align: right;">0.394</td>
+<td style="text-align: right;">0.029</td>
+<td style="text-align: right;">0.148</td>
+<td style="text-align: right;">0.141</td>
+<td style="text-align: right;">3.000000e-03</td>
+<td style="text-align: right;">0.719</td>
+<td style="text-align: right;">3.739</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Median Income</td>
+<td style="text-align: right;">153716.000</td>
+<td style="text-align: right;">28236.000</td>
+<td style="text-align: right;">61153.168</td>
+<td style="text-align: right;">57608.000</td>
+<td style="text-align: right;">3.158294e+08</td>
+<td style="text-align: right;">1.218</td>
+<td style="text-align: right;">5.063</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Unemployed</td>
+<td style="text-align: right;">0.067</td>
+<td style="text-align: right;">0.010</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.000000e+00</td>
+<td style="text-align: right;">1.374</td>
+<td style="text-align: right;">7.446</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Below 18</td>
+<td style="text-align: right;">0.417</td>
+<td style="text-align: right;">0.071</td>
+<td style="text-align: right;">0.223</td>
+<td style="text-align: right;">0.223</td>
+<td style="text-align: right;">1.000000e-03</td>
+<td style="text-align: right;">0.379</td>
+<td style="text-align: right;">5.475</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Above 65</td>
+<td style="text-align: right;">0.582</td>
+<td style="text-align: right;">0.075</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">0.175</td>
+<td style="text-align: right;">2.000000e-03</td>
+<td style="text-align: right;">1.580</td>
+<td style="text-align: right;">11.345</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="clustering-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="clustering-analysis">Clustering analysis</h3>
+<p>We prepare our dataset for clustering analysis using the social-economic and demographic variables. The dataset is standardized to remove the effect of scales on the clustering. We evaluate the validity of clustering by assessing its clustering tendency because the most clustering methods are not discriminating, meaning that even though the data are random uniformly distributed, it could also find some clustering patterns inside the dataset. We employ the Hopkins statistic, a measure probability that the dataset is generated by a uniform distribution. The null hypothesis suggesting a uniform distribution should indicate the value being close to 0.5. With a Hopkins statistic value of 0.9999973, we reject the null hypothesis and conclude that the resulting dataset exhibits a high degree of clusterability.</p>
+<p>Having established the dataset’s suitability for clustering analysis, the subsequent task is to determine the optimal number of clusters for partitioning. This step commonly revolves around optimizing a statistical criterion. An approach involves utilizing the within-cluster sum of squares (WSS), which measures the compactness of resulting clusters—a smaller WSS value indicates a more cohesive clustering. The following figure illustrates the variation in WSS with respect to the number of clusters. While the graph does not display a distinct elbow pattern, we deem it is reasonable to select 4 clusters as the WSS value does not exhibit a substantial decrease beyond this point.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We implement k-means clustering with a predetermined value of 4 for better understanding the underlying patterns in the data. As the data contain more than two variables, we use principal component analysis (PCA) to reduce the dimensionality and provide a scatter plot. As depicted in the 2-D cluster plot, the first principal component accounts for 41.8% of the total variation, while the second component explains an additional 19.5%. The cluster plot below indicates the presence of 4 meaningful clusters within the dataset in spite of some overlap between the clusters (especially between cluster 2 and 4), while cluster 3 and 4 clearly separate from each other.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The dataset is partitioned into 4 clusters, with each containing 389, 406, 278, and 214 data points. We can therefore characterize the social-economic profiles of these clusters by examining the distribution of the variables within each cluster. Cluster 3, in particular, has the highest rates of homicide, rural living, poverty and total death. It also has the smallest population, lowest higher education rate and median income. It is then labeled as “Small rural towns with more poverty and less education”. In contrast, cluster 4 shows best results among the social-economic factors with highest higher education, median income, but least rates of homicide, rural living, total deaths and poverty. We thus give it the label “Big cities with more wealth and education”. Clusters 1 and 2 fall between Clusters 3 and 4 in various indicators. Cluster 2 outperforms Cluster 1 in higher education rate, lower total death rates, higher median income, and less poverty, despite a slightly higher homicide rate. We notice that the indicators for cluster 2 are similar to the national level, but with less homicide and being less rural. We provide it with the label “Medium-sized cities averaging to national level”. Finally, cluster 1 has education, population, poverty, and median income below national averages, along with a more rural profile and a higher percentage of elderly population (and less children/teenager percentage). Therefore, it is labeled as “rural areas with higher elder population”. We do not leverage unemployment as a discriminitive factor as it converges around the national level rate across all clusters, even though it tends to be higher in bigger cities.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 15%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Cluster 1</td>
+<td style="text-align: left;">Cluster 2</td>
+<td style="text-align: left;">Cluster 3</td>
+<td style="text-align: left;">Cluster 4</td>
+<td style="text-align: left;">National</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Homicide</td>
+<td style="text-align: left;">5.0424</td>
+<td style="text-align: left;">5.7128</td>
+<td style="text-align: left;">12.8791</td>
+<td style="text-align: left;">3.5366</td>
+<td style="text-align: left;">6.6963</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Rural</td>
+<td style="text-align: left;">0.5175</td>
+<td style="text-align: left;">0.2512</td>
+<td style="text-align: left;">0.6042</td>
+<td style="text-align: left;">0.1165</td>
+<td style="text-align: left;">0.3855</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Higher Education</td>
+<td style="text-align: left;">0.1568</td>
+<td style="text-align: left;">0.1763</td>
+<td style="text-align: left;">0.1077</td>
+<td style="text-align: left;">0.2937</td>
+<td style="text-align: left;">0.1751</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Population</td>
+<td style="text-align: left;">89988</td>
+<td style="text-align: left;">216115</td>
+<td style="text-align: left;">43016</td>
+<td style="text-align: left;">737417</td>
+<td style="text-align: left;">227283</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Total Deaths</td>
+<td style="text-align: left;">0.0147</td>
+<td style="text-align: left;">0.0107</td>
+<td style="text-align: left;">0.0161</td>
+<td style="text-align: left;">0.0084</td>
+<td style="text-align: left;">0.0127</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Poverty</td>
+<td style="text-align: left;">0.1419</td>
+<td style="text-align: left;">0.133</td>
+<td style="text-align: left;">0.2197</td>
+<td style="text-align: left;">0.0922</td>
+<td style="text-align: left;">0.1476</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Median Income</td>
+<td style="text-align: left;">55994.2956</td>
+<td style="text-align: left;">63547.6133</td>
+<td style="text-align: left;">43194.9209</td>
+<td style="text-align: left;">89316.9486</td>
+<td style="text-align: left;">61153.1678</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Unemployed</td>
+<td style="text-align: left;">0.0214</td>
+<td style="text-align: left;">0.0234</td>
+<td style="text-align: left;">0.0232</td>
+<td style="text-align: left;">0.0245</td>
+<td style="text-align: left;">0.0229</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Below 18</td>
+<td style="text-align: left;">0.2019</td>
+<td style="text-align: left;">0.2383</td>
+<td style="text-align: left;">0.2326</td>
+<td style="text-align: left;">0.2202</td>
+<td style="text-align: left;">0.223</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Above 65</td>
+<td style="text-align: left;">0.217</td>
+<td style="text-align: left;">0.1525</td>
+<td style="text-align: left;">0.1806</td>
+<td style="text-align: left;">0.1546</td>
+<td style="text-align: left;">0.1784</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="regression-trees" class="level3">
+<h3 class="anchored" data-anchor-id="regression-trees">Regression trees</h3>
+<p>After obtaining the four clusters, we are able to analyse the relevant health factors (namely, smoke, obesity, food environment, physical inactivity, drinking and uninsurance rate) that potentially influence the COVID-19 death rate. To explore these relationships, we employ regression trees with the classification and regression trees (CART) algorithm. The generated trees offer an easily interpretable framework for discerning a county’s death rate. Starting from the root node that contains all data points, the algorithm sequentially partitions the data based on specific variable values. Each data point is then assigned to a new node through binary division. This process iterates until the stopping criterion is met. However, it is common for trees to become overly complicated such that their interpretability and prediction accuracy. To address this, we implement pre-pruning by controlling the complexity parameter such that a good balance between model simplicity and generality can be ensured. This is done by 5-fold cross validation with grid search on the hyper-parameter and in doing so we choose the one with least resulting RSME.</p>
+<p>The generated regression trees help us understand how relevant factors influence the COVID death rate for different kinds of cities. We start with the rural towns with higher elder population (Cluster 1). Beginning at the root node, we observe the mean COVID death rate at 2%, representing 100% of the total data points. Moving towards the first splitting rule, a physical inactivity rate less than 25% corresponds with the lowest death rate of 1.8%, which then encompasses 30% of the total data points. For cases where the physical inactivity rate is larger than or equal to 25%, a new set of splits emerge. Continuing the “if-then” structure, the uninsuarance rate exceeding 19% results in death rate of 2.8%. Conversely, if it is below 19%, we then investigate into the county’s food environment index. Should this index be above 6, the predicted death rate is 2.1%. Conversely, an food environment index less than 6 leads to a highest death rate of 3.3%, which occupies the smallest portion of data among all terminal nodes.</p>
+<p>Similar “if-then” rules could be applied on the rest of the trees, where the primary split is usually physical inactivity. Significantly different tree structure appears to belong to small rural towns with more poverty and less education (Cluster 3), where the first determining factor becomes smoking rate. Drinking also plays an important role as it appears several times in deeper layers of the tree.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-31-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-31-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-31-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-31-5.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The trees also provide metrics to measure the importance of the variables in its construction. It is calculated by the improvement in the purity that each variable contributes, which, as a result, may be different from the order in which they appear in the tree. Below are the figures of the (scaled) variable importance for the full data and each cluster. As can be seen, for most clusters, the primarily important variable is physical inactivity, followed by uninsuarnce and food and environment. However, for the rural areas with more poverty and less education, the most influential factor becomes uninsurane, and other important factors turn to be smoking, drinking, etc. Conversely, in big cities with more wealth and education, obesity takes the second place in the measurment of variable importance. It is, however, interesting to notice that uninsuarce is ranked not so important on a national level, which could be imputed to the instability of individual trees.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="COVID19-contraction-and-deathes-analysis_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This report delves into the dynamics of COVID-19 infections and deaths across U.S. counties between July 2020 and June 2021. We conduct both qualitative and time series analyses to gain insights into the overall COVID cases and deaths. In our findings, there exists large difference in different states in the size of the increase of cases and deaths but similar progressing pattern is observed across the states. Also, leveraging ARIMA enables us to model the moving dynamics and make accurate predictions, particularly in the COVID cases.</p>
+<p>Adopting a two-stage methodology inspired by de Ona et al.&nbsp;(2016), we initiate our analysis by clustering counties through K-means clustering based on their socioeconomic and demographic profiles, from which we are able to identify four distinct clusters. Subsequently, we construct regression trees for each cluster to examine the relationship between death rates and health-related factors. The finding underlines the significance of physical inactivity and lack of insurance, although exceptions are noted in rural areas with high poverty and low education, where factors such as lack of insurance, and excessive drinking and heavy smoking are deemed crucial. These insights are valuable to policymakers and health workers to help make better informed decisions in containing virus spread and reduce COVID caused deaths.</p>
+<p>However, given the amount of missing values in the data and unavailability of direct use of these entries, our analysis is conducted on the basis of 1287 counties out of 3193. We acknowledge that there could exist undiscovered patterns if we had access to those values and this also has effect on the construction of the regression trees. Secondly, the determination of the number of clusters in our analysis is based on the elbow rule. However, this method has limitations, especially given the turning point is not exactly clear in our case study. Alternative evaluation metrics, such as information criteria and Jaccard coefficient, could be used to make a more comprehensive approach to optimize the clusters. Thirdly, we have to point that the trees are not stable – a small variation in the data could result in a different tree, which impacts the determination of the important variables. Alternative ensemble and boosting methods could be utilized to enhance the accuracy and stability but at the cost of the losing easy interpretability of trees.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>de Ona, J., de Ona, R., Lopez, G. (2016). Transit service quality analysis using cluster analysis and decision trees: a step forward to personalized marketing in public transportation. Transportation, 43:725–747.</p>
+</section>
+<section id="annex" class="level2">
+<h2 class="anchored" data-anchor-id="annex">Annex</h2>
+<section id="links" class="level3">
+<h3 class="anchored" data-anchor-id="links">Links</h3>
+<p>Github: <a href="https://github.com/wuyuntong/Group_Project" class="uri">https://github.com/wuyuntong/Group_Project</a></p>
+<p>Data Source:</p>
+<p>Health data (2021 CHR CSV Analytic Data): <a href="https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation" class="uri">https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation</a></p>
+<p>COVID data (cases &amp; deaths): <a href="https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/" class="uri">https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/</a></p>
+<p>Social-economic data (poverty, unemployment, education, &amp; population): <a href="https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/" class="uri">https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data/</a></p>
+</section>
+<section id="details-on-data-pre-processing" class="level3">
+<h3 class="anchored" data-anchor-id="details-on-data-pre-processing">Details on data pre-processing</h3>
+<p>For COVID cases and deaths datasets, we formatted the county FIPS code such that it is a 5-digit string. The FIPS for statewide unallocated cases and deathes is assigned a new value “99999”. Variables important to the study(countyFIPS, County Name, State, StateFIPS and the numbers at the end of each month from Jul 2020 to June 2021) are reserved. After that, the case and death numbers are renamed corresponding to each month. A new row for US representing the nationwide cases and deaths is added.</p>
+<p>For social-economic and demographic datasets, we keep only the countyFIPS and variables mentioned in the section of variable description. For health dataset, we merged county FIPS and state FIPS such that the FIPS code is in line with other datasets. The variables for study are selected and are changed from the string type to numeric. Almost all the columns are complete, with no missing values.</p>
+<p>We extracted the the required variables as mentioned in the previous section. For each one of cases and deaths, we join them by the primary key countyFIPS with the rest of the pre-processed datasets. Missing values are deleted. The resulting final ones are cases_f and deaths_f with 1287 observations. These two datasets are used for clustering and regression tasks.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
