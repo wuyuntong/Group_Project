@@ -1,17 +1,17 @@
 ---
 title: "COVID-19 cases and deaths analysis"
-format: html
+format: 
+  pdf: default
+  html: default
 editor: visual
 author: Yuntong Wu & Jiaxin Shen
-execute: 
-  keep-md: true
 ---
 
 ## Research question
 
-The COVID-19 crisis has wreaked havoc on the world economy and people's lives. In the US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died as of mid-July, 2023, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from July 2020 to June 2021---a period marked by the peak severity of the pandemic and the coexistence of various policies. With the project, we aim to gain an understanding of how different factors played a role during the pandemic.
+The COVID-19 crisis has wreaked havoc on the world economy and people's lives. In the US, the impact has been staggering, with nearly 100 million people contracting the virus and over 1 million died as of mid-July, 2023, as reported by USAfacts. From cities to rural towns, it is important for policymakers to stay informed how COVID-19 is spreading and affects families, commerce, and travel to take measures. Our focus on this project is on scrutinizing COVID-19 data at the county level in the US from June 2020 to June 2021---a period marked by the peak severity of the pandemic and the coexistence of various policies. With the project, we aim to gain an understanding of how different factors played a role during the pandemic.
 
-First, our focus revolves around understanding the dynamics of the pandemic's progression within the US. It is crucial to delve into the data and find out whether there are tangible variations in the trends at some critical moments. For instance, we want to see if there is a dramatic increase in the confirmed cases or deaths during the outbreak of a new virus variant and how these numbers evolve as time goes by.
+First, our focus revolves around understanding the dynamics of the pandemic's progression within the US. It is crucial to delve into the data and find out whether there are tangible variations in the trends at some critical moments. For instance, we want to see if there is a dramatic difference in the confirmed cases or deaths in different regions and how these numbers evolve as time goes by.
 
 Furthermore, recognizing that the counties are different in various manners, our analysis seeks to uncover patterns of COVID cases and deaths that may be influenced by these differences. Our investigation extends to labeling the counties using the available characteristics. This could be done by using clustering techniques, such that counties with similar characteristics could be categorized into a group and others with disparate characteristics could be categorized into separate groups. By targeting specific cluster groups, policy makers are able to make better informed decisions to contain the spread of the virus or reduce the death rates.
 
@@ -276,7 +276,7 @@ health_c <- health[2:nrow(health), ] |>
     Smoke = `Adult smoking raw value`,
     Obesity = `Adult obesity raw value`,
     `Food Environment` = `Food environment index raw value`,
-    `Physical inactivity` = `Physical inactivity raw value`,
+    `Physical Inactivity` = `Physical inactivity raw value`,
     Drinking = `Excessive drinking raw value`,
     Uninsured = `Uninsured raw value`,
     Homicide = `Homicides raw value`,
@@ -288,7 +288,7 @@ health_c <- health[2:nrow(health), ] |>
     Smoke = as.numeric(Smoke),
     Obesity = as.numeric(Obesity),
     `Food Environment` = as.numeric(`Food Environment`),
-    `Physical inactivity` = as.numeric(`Physical inactivity`),
+    `Physical Inactivity` = as.numeric(`Physical Inactivity`),
     Drinking = as.numeric(Drinking),
     Uninsured = as.numeric(Uninsured),
     Homicide = as.numeric(Homicide),
@@ -410,9 +410,9 @@ p_food <- ggplot(data = cases_f, aes(x = `Food Environment`)) +
   geom_histogram(color = "black", bins = 50) +
   labs(x = "Food Environment", y = "Frequency")
 
-p_phys <- ggplot(data = cases_f, aes(x = `Physical inactivity`)) +
+p_phys <- ggplot(data = cases_f, aes(x = `Physical Inactivity`)) +
   geom_histogram(color = "black", bins = 50) +
-  labs(x = "Physical inactivity", y = "Frequency")
+  labs(x = "Physical Inactivity", y = "Frequency")
 
 p_drink <- ggplot(data = cases_f, aes(x = `Drinking`)) +
   geom_histogram(color = "black", bins = 50) +
@@ -442,7 +442,7 @@ t_smok <- tab_dis(cases_f, "Smoke")
 t_drink <- tab_dis(cases_f, "Drinking")
 t_obs <- tab_dis(cases_f, "Obesity")
 t_uni <- tab_dis(cases_f, "Uninsured")
-t_phs <- tab_dis(cases_f, "Physical inactivity")
+t_phs <- tab_dis(cases_f, "Physical Inactivity")
 t_food <- tab_dis(cases_f, "Food Environment")
 
 bind_rows(t_smok, t_drink, t_obs, t_uni, t_phs, t_food) |> knitr::kable(digits = 3)
@@ -516,17 +516,16 @@ Next we aim to identify the specific trends in cases and deaths across various r
 
 #### Model introduction
 
-ARIMA (Auto-Regressive Integrated Moving Average) is a popular approach to modelling dynamical systems. ARIMA model uses the difference method to eliminate trend and seasonality. The resulting series is treated as stationary time series data and is modelled using combination of its lagged time series values (“AR”) and moving average of lagged forecast errors (“MA”). An ARIMA model is typically specified by a tuple (p, d, q), where p and q define the orders of AR and MA, and d specifies the order of differencing operation.
+ARIMA (Auto-Regressive Integrated Moving Average) is a popular approach to modelling dynamical systems. ARIMA model uses the difference method to eliminate trend and seasonality. The resulting series is treated as stationary time series data and is modelled using combination of its lagged time series values (“AR”) and moving average of lagged forecast errors (“MA”). An ARIMA model is typically specified by a tuple (p, d, q), where p and q define the orders of AR and MA, and d specifies the order of differencing operation, in the form of $(1 - \sum_{i=1}^{p} \phi_{i} L^{i} ) \; (1-L)^{d} \; X_{t} = (1 + \sum_{i = 1}^{q} \theta_{i}L^{i}) \;\epsilon_{t}$.
 
 The advantage of the ARIMA model is that the model is simple and only requires endogenous variables without the help of other exogenous variables. Nevertheless, ARIMA model also has disadvantages: The time series data is required to be stable, or be stable after differentiation; essentially it can only capture linear relationships, not non-linear relationships.
-
-$(1 - \sum_{i=1}^{p} \phi_{i} L^{i} ) \; (1-L)^{d} \; X_{t} = (1 + \sum_{i = 1}^{q} \theta_{i}L^{i}) \;\epsilon_{t}$
 
 #### Empirical analysis
 
 In order to test the accuracy of model fitting, we divided the data set into a training set and a test set. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
 
 ##### National cases
+
 Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.
 
 ```{r}
@@ -548,23 +547,26 @@ adf1 <- adf.test(diff(diff(case_ts)))
 
 By applying the ADF test on the second-order difference data, we find the test statistic is `r adf1$statistic` with a lag order of 6, resulting in a p-value of `r adf1$p.value`. We thus reject the null hypothesis (under the 5% significance level), and the stationarity is supported for the second-order differenced series.
 
-By minimizing AIC, the obtained ARIMA model is an ARIMA(2,2,4) with the estimated cofficients $\phi_{1} = 0.7446, \phi_{2} = -0.6193,$ $\phi_{3} = -0.0969, \phi_{4} = -0.2473, \theta_{1} = -1.0541 \; \text{and} \; \phi_{2} = 0.6374$. By inspecting the residuals, we find it tends to be a white noise, although the residuals do not seem to be normal.
+By minimizing AIC, the obtained ARIMA model is an ARIMA(2,2,2) with the estimated cofficients $\phi_{1} = 1.1897, \phi_{2} = -0.7419, \theta_{1} = -1.4758 \; \text{and} \; \phi_{2} = 0.7469$. By inspecting the residuals, we find it tends to be a white noise, as there are few cases of significant autocorrelation despite its distribution slightly deviates from normal.
 
-We then use the fitted model to predict the number of cases and compare it with the test set. As shown in the figure below, the blue line is the model prediction curve, the red line is the curve of the test set, and the shaded area is the confidence interval. The model prediction curve is not much different from the curve of the test set, and both are within the confidence interval.
+In the subsequent analysis, we assess the forecasting accuracy of the model in the period from March 2021 to June 2021 (the remaining 30% of the data). The actual data curve in red and fitted curve in blue, along with 80% and 95% confidence intervals are represented. The high predictability is also validated by the value of mean absolute percentage error of 0.098%, suggesting a high level of accuracy.
 
 ```{r}
 cutoff_index <- floor(0.7 * length(case_ts))
+
 train_case <- case_ts[1:cutoff_index]
 test_case <- case_ts[cutoff_index : length(case_ts)] |> ts(start = as.character(cutoff_index + 1))
 model_case <- auto.arima(train_case, ic = "aic")
 checkresiduals(model_case, test = FALSE)
-plot(forecast(model_case, h = floor(0.3 * length(case_ts)) + 1) )
+forecast1 <- forecast(model_case, h = floor(0.3 * length(case_ts)) + 1)
+plot(forecast1)
 lines(test_case, lwd = 2, col = "red") 
+mape1 <- mean(abs((test_case - forecast1$mean) / test_case)) * 100
 ```
 
 ##### National deaths
 
-Next, we perform a similar analysis on national deaths data. From the results, we can see that the death data becomes stable after second-order difference. By minimizing AIC, we obtain  an ARIMA(5,2,2). The model prediction curve (blue line) and the test set curve (red line) are within the confidence interval, which means that we have reason to believe that this model reflects the information of the data to a certain extent. 
+By performing similar analysis on the deaths, we obtain an ARIMA(5,2,2) with estimated coefficients $\phi_{1} = 0.3002, \phi_{2} = -0.5749, \phi_{5} = -0.3117, \phi_{4} = -0.2904, \phi_{5} = -0.3423, \theta_{1} = -0.9409, \theta_{2} = 0.5743$. Following the previous analysis, the residuals of the model also tend to be white noise. The MAPE for the model is 22.878%, indicating a moderate level of accuracy since it tends to overestimate the number of deaths.
 
 ```{r}
 national_deaths <- deaths |>
@@ -594,26 +596,10 @@ test_death <- death_ts[cutoff_index : length(death_ts)] |>
 ```{r}
 model_death <- auto.arima(train_death, ic = "aic")
 checkresiduals(model_death, test = FALSE)
-plot(forecast(model_death, h = floor(0.3 * length(case_ts))+ 1))
+forecast2 <- forecast(model_death, h = floor(0.3 * length(case_ts)) + 1)
+mape2 <- mean(abs((test_case - forecast2$mean) / test_case)) * 100
+plot(forecast2)
 lines(test_death, lwd = 2, col = "red")
-```
-
-##### Relationship between national cases and deaths
-
-Besides examining the correlation between cases and deaths themselves, we also aim to determine if there is a significant relationship between cases and deaths. We opted for linear regression in this case. The results of the linear regression indicate a significant linear correlation between deaths and cases, implying that the virus's fatality rate is maybe a constant value, around 1.53%.
-
-```{r}
-national_data <- left_join(national_cases, national_deaths, "Date")
-```
-
-```{r}
-c_relation <- lm(national_data$Deaths ~ national_data$Cases)
-ggplot(national_data, aes(x = Cases, y = Deaths)) +
-  geom_point(color = "blue") +
-  geom_abline(intercept = coef(c_relation)[1], slope = coef(c_relation)[2], color = "red") +
-  labs(x = "Cases", y = "Deats", title = "Linear Regression") +
-  theme_minimal()
-summary(c_relation)
 ```
 
 ### Clustering analysis
@@ -685,7 +671,7 @@ knitr::kable(tab)
 
 ```{r, echo = FALSE}
 var_select <- function(df) {
-  df |> select(Smoke, Obesity, `Food Environment`, `Physical inactivity`, Drinking, Uninsured, `death_rate`)
+  df |> select(Smoke, Obesity, `Food Environment`, `Physical Inactivity`, Drinking, Uninsured, `death_rate`)
 }
 
 all <- var_select(cases_f)
@@ -775,13 +761,16 @@ plot_grid(plot, NULL, plot1, plot2, plot3, plot4, nrow = 3, ncol = 2, align = "v
 ```
 
 ## Conclusion
-This report investigates into the COVID-19 infection and deaths across the counties in US from June 2020 and July. We refer to the two-stage methodology as outlined in de Ona (2016). First, we cluster the counties using K-means clustering based on the their social economic profile, from which we are able to identify four distinct clusters. Then we build regression trees for each of the clusters to study the relationship between the death rate and health-related factors, which enables us to better target specific regions to reduce the COVID caused deaths. The findings mostly agree on that physical inactivity being the foremost important factors in COVID caused deaths. The exception is the rural areas with high poverty and low education, where uninsuarance becomes the most important and drinking and smoking also are deemed important. This finding could be used for policy makers to better
 
-Given the amount of missing values in the data and not considering the entries with these missing values, our analysis is conducted on the basis of `r nrow(cases_f)` counties out of `r nrow(cases)`. We must acknowledge that there could exist undiscovered patterns if we had access to those values and this also has some effect on the regression tree analysis. Secondly, we determine the number of clusters simply by elbow rule, which . Thirdly, we also have to point that the trees are not a stable method -- a small variation in the data could result in a different tree. Ensemble and boosting methods, such as random forests and gradient boosted trees, could be utilized to enhance the accuracy and stability but at the cost of the loss of easy interpretability of trees.
+This report delves into the dynamics of COVID-19 infections and deaths across U.S. counties between June 2020 and June 2021.we conduct both qualitative and time series analyses to gain insights into the overall COVID cases and deaths. In our findings, t there exists large difference in different states in the size of the increase of cases and deaths but the overall trend is observed similarly across the states. Also, leveraging ARIMA enables to leverage moving dynamics of the make predictions, particularly in the COVID cases.
+
+Adopting a two-stage methodology inspired by de Ona et al. (2016), we initiate our analysis by clustering counties through K-means clustering based on their socioeconomic and demographic profiles, from which we are able to identify four distinct clusters. Subsequently, we construct regression trees for each cluster to examine the relationship between death rates and health-related factors. The finding underlines the significance of physical inactivity, although exceptions are noted in rural areas with high poverty and low education, where factors such as lack of insurance, and excessive drinking and heavy smoking are deemed crucial. These insights are valuable to policymakers to help make better informed decisions in cotaining virus spread and reduce COVID caused deaths.
+
+Howeverm, given the amount of missing values in the data and unavailability of direct use of these entries, our analysis is conducted on the basis of `r nrow(cases_f)` counties out of `r nrow(cases)`. We acknowledge that there could exist undiscovered patterns if we had access to those values and this also has effect on the construction of the regression trees. Secondly, the determination of the number of clusters in our analysis is based on the elbow rule. However, this method has limitations, especially given the turning point is not exactly clear in our case study. Alternative evaluation metrics, such as information criteria and Jaccard coefficient, could be used to make a more comprehensive approach to optimize the clusters. Thirdly, we have to point that the trees are not stable -- a small variation in the data could result in a different tree. Alternative ensemble and boosting methods could be utilized to enhance the accuracy and stability but at the cost of the loss of easy interpretability of trees.
 
 ## References
 
-Almalki A, Gokaraju B, Acquaah Y, Turlapaty A. (2022) Regression analysis for COVID-19 infections and deaths based on food access and health issues. Healthcare 10(2):324.
+de Ona, J., de Ona, R., Lopez, G. (2016). Transit service quality analysis using cluster analysis and decision trees: a step forward to personalized marketing in public transportation. Transportation, 43:725–747.
 
 ## Annex
 
