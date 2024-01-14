@@ -512,13 +512,22 @@ bind_rows(t_homi, t_rural, t_hedu, t_pop, t_tdeath, t_pov, t_inc, t_unemp, t_18,
 
 ### Time series analysis of national cases and deaths.
 
-Next we aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from June 31, 2020, to June 30, 2021.
+Next we aim to identify the specific trends in cases and deaths across various regions in the United States over a certain period. We have selected the daily cumulative data from June 31, 2020, to June 30, 2021, and used the ARIMA model for analysis.
 
-Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.Utilizing the ARIMA model has the advantages of simplicity and the ability to handle non-stationary sequences. Consequently, we chose the ARIMA model as the foundational model for analysis. The initial 70% of the data is used as the training set, and the remaining 30% is utilized as the test set.
+#### Model introduction
+
+ARIMA (Auto-Regressive Integrated Moving Average) is a popular approach to modelling dynamical systems. ARIMA model uses the difference method to eliminate trend and seasonality. The resulting series is treated as stationary time series data and is modelled using combination of its lagged time series values (“AR”) and moving average of lagged forecast errors (“MA”). An ARIMA model is typically specified by a tuple (p, d, q), where p and q define the orders of AR and MA, and d specifies the order of differencing operation.
+
+The advantage of the ARIMA model is that the model is simple and only requires endogenous variables without the help of other exogenous variables. Nevertheless, ARIMA model also has disadvantages: The time series data is required to be stable, or be stable after differentiation; essentially it can only capture linear relationships, not non-linear relationships.
 
 $(1 - \sum_{i=1}^{p} \phi_{i} L^{i} ) \; (1-L)^{d} \; X_{t} = (1 + \sum_{i = 1}^{q} \theta_{i}L^{i}) \;\epsilon_{t}$
 
-#### National cases
+#### Empirical analysis
+
+In order to test the accuracy of model fitting, we divided the data set into a training set and a test set. The initial 80% of the data is used as the training set, and the remaining 20% is utilized as the test set.
+
+##### National cases
+Initially, by plotting graphs and conducting an ADF test, we found that the original data was not stationary. After performing a second differencing, we obtained a relatively stable dataset.
 
 ```{r}
 national_cases <- cases |>
@@ -539,7 +548,7 @@ adf1 <- adf.test(diff(diff(case_ts)))
 
 By applying the ADF test on the second-order difference data, we find the test statistic is `r adf1$statistic` with a lag order of 6, resulting in a p-value of `r adf1$p.value`. We thus reject the null hypothesis (under the 5% significance level), and the stationarity is supported for the second-order differenced series.
 
-By minimizing AIC, the obtained ARIMA model is an ARIMA(4,2,2) with the estimated cofficients $\phi_{1} = 0.7446, \phi_{2} = -0.6193,$ $\phi_{3} = -0.0969, \phi_{4} = -0.2473, \theta_{1} = -1.0541 \; \text{and} \; \phi_{2} = 0.6374$. By inspecting the residuals, we find it tends to be a white noise, although the residuals do not seem to be normal. 
+By minimizing AIC, the obtained ARIMA model is an ARIMA(4,2,2) with the estimated cofficients $\phi_{1} = 0.7446, \phi_{2} = -0.6193,$ $\phi_{3} = -0.0969, \phi_{4} = -0.2473, \theta_{1} = -1.0541 \; \text{and} \; \phi_{2} = 0.6374$. By inspecting the residuals, we find it tends to be a white noise, although the residuals do not seem to be normal.
 
 ```{r}
 cutoff_index <- floor(0.7 * length(case_ts))
@@ -552,7 +561,7 @@ plot(forecast(model_case, h = floor(0.3 * length(case_ts)) + 1) )
 lines(test_case, lwd = 2, col = "red") 
 ```
 
-#### National deaths
+##### National deaths
 
 ```{r}
 national_deaths <- deaths |>
@@ -585,7 +594,7 @@ plot(forecast(model_death, h = floor(0.3 * length(case_ts))+ 1))
 lines(test_death, lwd = 2, col = "red")
 ```
 
-#### Relationship between national cases and deaths
+##### Relationship between national cases and deaths
 
 Besides examining the correlation between cases and deaths themselves, we also aim to determine if there is a significant relationship between cases and deaths. We opted for linear regression in this case. The results of the linear regression indicate a significant linear correlation between deaths and cases, implying that the virus's fatality rate is maybe a constant value, around 1.53%.
 
@@ -762,6 +771,8 @@ plot_grid(plot, NULL, plot1, plot2, plot3, plot4, nrow = 3, ncol = 2, align = "v
 ```
 
 ## Conclusion
+
+
 
 This report investigates into the COVID-19 infection and deaths across the counties in US from June 2020 and July. We refer to the two-stage methodology as outlined in de Ona (2016). First, we cluster the counties using K-means clustering based on the their social economic profile, from which we are able to identify four distinct clusters. Then we build regression trees for each of the clusters to study the relationship between the death rate and health-related factors, which enables us to better target specific regions to reduce the COVID caused deaths. The findings mostly agree on that physical inactivity being the foremost important factors in COVID caused deaths. The exception is the rural areas with high poverty and low education, where uninsuarance becomes the most important and drinking and smoking also are deemed important. This finding could be used for policy makers to better
 
